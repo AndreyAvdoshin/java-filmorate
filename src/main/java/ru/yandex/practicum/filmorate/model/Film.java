@@ -9,8 +9,7 @@ import lombok.NonNull;
 import java.time.LocalDate;
 
 @Data
-public class Film {
-    private int id;
+public class Film extends Entity {
 
     @NonNull
     @NotBlank

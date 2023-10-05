@@ -31,7 +31,7 @@ class UserControllerTest {
     ObjectMapper objectMapper;
 
     @Autowired
-    UserController userController;
+    Controller<User> userController;
 
     User user;
 
@@ -42,13 +42,13 @@ class UserControllerTest {
 
     @Test
     void shouldGetUsers() {
-        userController.createUser(user);
+        userController.create(user);
 
         User user2 = new User("aaa@bbb.eee", "PasLogin", LocalDate.of(2002, 1, 1));
-        userController.createUser(user2);
+        userController.create(user2);
 
-        Assertions.assertNotNull(userController.getUsers(), "Список пользователей пустой");
-        Assertions.assertEquals(2, userController.getUsers().size(), "Неверное кол-во пользователей");
+        Assertions.assertNotNull(userController.get(), "Список пользователей пустой");
+        Assertions.assertEquals(2, userController.get().size(), "Неверное кол-во пользователей");
     }
 
     @Test

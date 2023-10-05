@@ -9,8 +9,7 @@ import lombok.NonNull;
 import java.time.LocalDate;
 
 @Data
-public class User {
-    private int id;
+public class User extends Entity {
 
     @NonNull
     @Email

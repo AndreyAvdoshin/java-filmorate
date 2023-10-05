@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class FilmControllerTest {
 
+
     @Autowired
     MockMvc mockMvc;
 
@@ -31,7 +32,7 @@ class FilmControllerTest {
     ObjectMapper objectMapper;
 
     @Autowired
-    FilmController filmController;
+    Controller<Film> filmController;
 
     Film film;
 
@@ -43,15 +44,15 @@ class FilmControllerTest {
 
     @Test
     void shouldGetFilms() {
-        filmController.createFilm(film);
+        filmController.create(film);
 
         Film film2 = new Film("Другой фильм", "Другое описание",
                 LocalDate.of(2001, 2, 2), 90);
 
-        filmController.createFilm(film2);
+        filmController.create(film2);
 
-        Assertions.assertNotNull(filmController.getFilms(), "Список фильмов пустой");
-        Assertions.assertEquals(2, filmController.getFilms().size(), "Запрос всех фильмов возвращается неверно");
+        Assertions.assertNotNull(filmController.get(), "Список фильмов пустой");
+        Assertions.assertEquals(2, filmController.get().size(), "Запрос всех фильмов возвращается неверно");
     }
 
     @Test

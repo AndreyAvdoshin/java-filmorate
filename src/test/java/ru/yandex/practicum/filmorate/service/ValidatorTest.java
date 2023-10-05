@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ValidatorTest {
 
-
     @Test
     void shouldValidateFilmWithIncorrectReleaseDate() {
         Film film = new Film("Неправильный фильм", "Описание фильма с неправильной датой",
@@ -26,13 +25,13 @@ class ValidatorTest {
     void shouldThrowValidationExceptionWhenFilmNotFound() {
         ValidationException exception = assertThrows(ValidationException.class, () -> Validator.validate((Film) null));
 
-        assertEquals("Фильм с указанным id не найден", exception.getMessage());
+        assertEquals("Объект с указанным id не найден", exception.getMessage());
     }
 
     @Test
     void shouldThrowValidationExceptionWhenUserNotFound() {
         ValidationException exception = assertThrows(ValidationException.class, () -> Validator.validate((User) null));
 
-        assertEquals("Пользователь с указанным id не найден", exception.getMessage());
+        assertEquals("Объект с указанным id не найден", exception.getMessage());
     }
 }
