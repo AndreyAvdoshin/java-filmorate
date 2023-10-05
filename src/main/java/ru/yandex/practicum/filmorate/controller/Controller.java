@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.model.Entity;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.Validator;
 
 import javax.validation.Valid;
@@ -29,10 +28,6 @@ public abstract class Controller<T extends Entity> {
 
     @PostMapping
     public T create(@Valid @RequestBody T entity) {
-        // проверка на пустое имя, если объект класса Юзер
-        if (entity.getClass() == User.class && ((User) entity).getName() == null) {
-            ((User) entity).setName(((User) entity).getLogin());
-        }
         Validator.validate(entity);
         entity.setId(++id);
         entities.put(id, entity);
