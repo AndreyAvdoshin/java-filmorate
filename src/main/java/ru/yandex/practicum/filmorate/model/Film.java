@@ -4,11 +4,16 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class Film extends Entity {
 
     @NonNull
@@ -25,4 +30,18 @@ public class Film extends Entity {
 
     @Positive
     private final int duration;
+
+    private Set<Integer> likesByUserIds = new HashSet<>();
+
+    public void setLike(int id) {
+        likesByUserIds.add(id);
+    }
+
+    public void removeLike(Integer id) {
+        likesByUserIds.remove(id);
+    }
+
+    public int getLikesCount() {
+        return likesByUserIds.size();
+    }
 }
