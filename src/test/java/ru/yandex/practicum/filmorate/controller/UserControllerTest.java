@@ -37,14 +37,14 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        user = new User("aaa@bbb.ccc", "login", LocalDate.of(2000, 1, 1));
+        user = new User("aaa@bbb.ccc", "login", "", LocalDate.of(2000, 1, 1));
     }
 
     @Test
     void shouldGetUsers() {
         userController.create(user);
 
-        User user2 = new User("aaa@bbb.eee", "PasLogin", LocalDate.of(2002, 1, 1));
+        User user2 = new User("aaa@bbb.eee", "PasLogin", "", LocalDate.of(2002, 1, 1));
         userController.create(user2);
 
         Assertions.assertNotNull(userController.get(), "Список пользователей пустой");
@@ -102,7 +102,7 @@ class UserControllerTest {
 
     @Test
     void shouldGet400WhenBirthdayIsIncorrect() throws Exception {
-        user = new User("aaa@bbb.eee", "PasLogin", LocalDate.of(3002, 1, 1));
+        user = new User("aaa@bbb.eee", "PasLogin", "", LocalDate.of(3002, 1, 1));
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -123,12 +123,12 @@ class UserControllerTest {
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldGet400WhenEmailIsIncorrect() throws Exception {
-        user = new User("bbb.ccc@", "login", LocalDate.of(2000, 1, 1));
+        user = new User("bbb.ccc@", "login", "", LocalDate.of(2000, 1, 1));
 
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
