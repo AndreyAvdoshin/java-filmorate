@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
 public class UserService extends BaseService<User> {
 
     @Autowired
-    public UserService(Storage<User> storage) {
+    public UserService(@Qualifier("UserDBStorage") Storage<User> storage) {
         super(storage);
     }
 

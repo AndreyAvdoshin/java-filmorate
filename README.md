@@ -1,2 +1,3 @@
 # java-filmorate
-Template repository for Filmorate project.
+# Диаграмма отношений базы данных (ERD)
+![Диаграмма](./images/diagram.png)

@@ -31,17 +31,21 @@ public class Film extends Entity {
     @Positive
     private final int duration;
 
-    private Set<Integer> likesByUserIds = new HashSet<>();
+    private int mpa;
+
+    private Set<Integer> likes = new HashSet<>();
+
+    private Set<Integer> genres = new HashSet<>();
 
     public void setLike(int id) {
-        likesByUserIds.add(id);
+        likes.add(id);
     }
 
     public void removeLike(Integer id) {
-        likesByUserIds.remove(id);
+        likes.remove(id);
     }
 
     public int getLikesCount() {
-        return likesByUserIds.size();
+        return likes.size();
     }
 }
