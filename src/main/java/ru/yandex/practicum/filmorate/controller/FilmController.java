@@ -24,10 +24,10 @@ public class FilmController extends Controller<Film> {
         this.service = service;
     }
 
-    @GetMapping("/{id}")
-    public Film getUser(@PathVariable int id) {
-        return service.getFilm(id);
-    }
+//    @GetMapping("/{id}")
+//    public Film getUser(@PathVariable int id) {
+//        return service.getFilm(id);
+//    }
 
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable int id, @PathVariable int userId) {

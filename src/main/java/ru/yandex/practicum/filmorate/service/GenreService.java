@@ -17,7 +17,7 @@ public class GenreService extends BaseService<Genre>{
     }
 
     public List<Genre> getGenres() {
-        return storage.getAll();
+        return storage.get();
     }
 
 }

@@ -37,7 +37,7 @@ public abstract class Storage<T extends Entity> {
         return entites.get(id);
     }
 
-    public List<T> getAll() {
-        return new ArrayList<>(entites.values());
-    }
+//    public List<T> getAll() {
+//        return new ArrayList<>(entites.values());
+//    }
 }

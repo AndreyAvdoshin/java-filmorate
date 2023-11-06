@@ -23,10 +23,10 @@ public class UserController extends Controller<User> {
         this.service = service;
     }
 
-    @GetMapping("/{id}")
-    public User getUser(@PathVariable int id) {
-        return service.getUser(id);
-    }
+//    @GetMapping("/{id}")
+//    public User getUser(@PathVariable int id) {
+//        return service.getUser(id);
+//    }
 
     @Override
     public User create(@Valid @RequestBody User user) {

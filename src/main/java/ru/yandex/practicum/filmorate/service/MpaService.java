@@ -17,7 +17,13 @@ public class MpaService extends BaseService<Mpa> {
         super(storage);
     }
 
-    public List<Mpa> getMpa() {
-        return storage.getAll();
-    }
+//    @Override
+//    public List<Mpa> get() {
+//        return storage.getAll();
+//    }
+//
+//    @Override
+//    public Mpa getEntity(int id) {
+//        return storage.getEntityById(id);
+//    }
 }

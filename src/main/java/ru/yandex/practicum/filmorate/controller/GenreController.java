@@ -21,9 +21,4 @@ public class GenreController extends Controller<Genre>{
         this.service = service;
     }
 
-    @GetMapping
-    public List<Genre> get() {
-        return service.getGenres();
-    }
-
 }

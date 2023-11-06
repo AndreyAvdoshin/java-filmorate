@@ -2,10 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Entity;
 import ru.yandex.practicum.filmorate.service.BaseService;
 import ru.yandex.practicum.filmorate.service.Validator;
@@ -25,6 +22,11 @@ public abstract class Controller<T extends Entity> {
     @GetMapping
     public List<T> get() {
         return service.get();
+    }
+
+    @GetMapping("/{id}")
+    public T getById(@PathVariable int id) {
+        return service.getEntity(id);
     }
 
     @PostMapping

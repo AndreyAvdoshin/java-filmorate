@@ -8,7 +8,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -31,7 +33,7 @@ public class Film extends Entity {
     @Positive
     private final int duration;
 
-    private int mpa;
+    private int mpaId;
 
     private Set<Integer> likes = new HashSet<>();
 
@@ -47,5 +49,17 @@ public class Film extends Entity {
 
     public int getLikesCount() {
         return likes.size();
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> values = new HashMap<>();
+
+        values.put("name", name);
+        values.put("description", description);
+        values.put("releaseDate", releaseDate);
+        values.put("duration", duration);
+        values.put("mpaId", mpaId);
+
+        return values;
     }
 }

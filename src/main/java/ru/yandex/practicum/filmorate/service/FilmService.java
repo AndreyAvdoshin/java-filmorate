@@ -37,7 +37,7 @@ public class FilmService extends BaseService<Film> {
     }
 
     public List<Film> getRatedFilms(int count) {
-        List<Film> films = storage.getAll();
+        List<Film> films = storage.get();
         films.sort(Comparator.comparingInt(Film::getLikesCount).reversed());
         return films.stream().limit(count).collect(Collectors.toList());
     }
