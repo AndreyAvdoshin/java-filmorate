@@ -14,30 +14,30 @@ import java.util.Map;
 @Component
 public abstract class Storage<T extends Entity> {
 
-    private final Map<Integer, T> entites = new HashMap<>();
+    private final Map<Integer, T> entities = new HashMap<>();
     private int id = 0;
 
     public List<T> get() {
-        return new ArrayList<>(entites.values());
+        return new ArrayList<>(entities.values());
     }
 
     public T create(T entity) {
         entity.setId(++id);
-        entites.put(id, entity);
-        log.info("Добавлен объект: {}", entity);
+        entities.put(id, entity);
+        log.info("Сохранен объект: {}", entity);
         return entity;
     }
 
     public T update(T entity) {
-        entites.put(entity.getId(), entity);
-        return entites.get(entity.getId());
+        entities.put(entity.getId(), entity);
+        return entities.get(entity.getId());
     }
 
     public T getEntityById(int id) {
-        return entites.get(id);
+        return entities.get(id);
     }
 
 //    public List<T> getAll() {
-//        return new ArrayList<>(entites.values());
+//        return new ArrayList<>(entities.values());
 //    }
 }

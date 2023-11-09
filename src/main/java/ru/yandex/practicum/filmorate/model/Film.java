@@ -3,11 +3,11 @@ package ru.yandex.practicum.filmorate.model;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
+
+import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -15,12 +15,15 @@ import java.util.Set;
 
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class Film extends Entity {
 
     @NonNull
     @NotBlank
-    private final String name;
+    private String name;
 
     @NonNull
     @NotBlank
@@ -28,16 +31,16 @@ public class Film extends Entity {
     private String description;
 
     @NonNull
-    private final LocalDate releaseDate;
+    private LocalDate releaseDate;
 
     @Positive
-    private final int duration;
+    private int duration;
 
-    private int mpaId;
+    private Mpa mpa;
 
     private Set<Integer> likes = new HashSet<>();
 
-    private Set<Integer> genres = new HashSet<>();
+    private Set<Genre> genres = new HashSet<>();
 
     public void setLike(int id) {
         likes.add(id);
@@ -56,9 +59,10 @@ public class Film extends Entity {
 
         values.put("name", name);
         values.put("description", description);
-        values.put("releaseDate", releaseDate);
+        values.put("release_Date", releaseDate);
         values.put("duration", duration);
-        values.put("mpaId", mpaId);
+        values.put("mpa_Id", mpa.getId());
+        values.put("created", LocalDateTime.now());
 
         return values;
     }

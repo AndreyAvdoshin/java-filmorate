@@ -52,10 +52,12 @@ public class FilmService extends BaseService<Film> {
 
     @Override
     public Film getEntity(int id) {
-        if (storage.getEntityById(id) == null) {
-            throw new NotFoundException("Фильм с id - " + id + " не найден");
+        Film film = storage.getEntityById(id);
+        if (film == null) {
+            log.debug("Запрос фильма по id - {}", id);
+            throw new NotFoundException("Фильм с id " + id + " не найден");
         }
-        return super.getEntity(id);
+        return film;
     }
 
 }

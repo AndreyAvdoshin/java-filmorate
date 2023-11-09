@@ -37,7 +37,7 @@ public abstract class Controller<T extends Entity> {
 
     @PutMapping
     public T update(@Valid @RequestBody @NonNull T entity) {
-        Validator.validate(service.getEntity(entity.getId()));
+        Validator.validate(entity);
         return service.update(entity);
     }
 

@@ -43,7 +43,7 @@ public class FilmController extends Controller<Film> {
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable int id, @PathVariable int userId) {
          if (userId <= 0) {
-            throw new NotFoundException("Пользователь с id - " + id + " не найден");
+            throw new NotFoundException("Пользователь с id - " + userId + " не найден");
         }
         service.deleteLike(id, userId);
     }

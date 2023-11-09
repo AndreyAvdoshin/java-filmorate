@@ -22,14 +22,14 @@ public class UserService extends BaseService<User> {
         super(storage);
     }
 
-    public User getUser(int id) {
-        User user = storage.getEntityById(id);
-        if (user == null) {
-            log.debug("Не найден пользователь по id - {}", id);
-            throw new NotFoundException("Пользователь с id " + id + " не найден");
-        }
-        return user;
-    }
+//    public User getUser(int id) {
+//        User user = storage.getEntityById(id);
+//        if (user == null) {
+//            log.debug("Не найден пользователь по id - {}", id);
+//            throw new NotFoundException("Пользователь с id " + id + " не найден");
+//        }
+//        return user;
+//    }
 
     public void createFriendship(int firstUserId, int secondUserId) {
         checkUsers(firstUserId, secondUserId);
@@ -94,10 +94,11 @@ public class UserService extends BaseService<User> {
 
     @Override
     public User getEntity(int id) {
-        if (storage.getEntityById(id) == null) {
+        User user = storage.getEntityById(id);
+        if (user == null) {
             log.debug("Не найден пользователь по id - {}", id);
-            throw new NotFoundException("Пользователь с id - " + id + " не найден");
+            throw new NotFoundException("Пользователь с id " + id + " не найден");
         }
-        return super.getEntity(id);
+        return user;
     }
 }
