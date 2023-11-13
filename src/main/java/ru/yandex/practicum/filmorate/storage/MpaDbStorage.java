@@ -6,19 +6,18 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.List;
 
 @Slf4j
-@Component("MpaDBStorage")
-public class MpaDBStorage extends Storage<Mpa> {
+@Component("MpaDbStorage")
+public class MpaDbStorage extends Storage<Mpa> {
 
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public MpaDBStorage(JdbcTemplate jdbcTemplate) {
+    public MpaDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -34,10 +33,10 @@ public class MpaDBStorage extends Storage<Mpa> {
         Mpa mpa = jdbcTemplate.query("SELECT * FROM mpa WHERE id = ?", new Object[]{id},
                 new BeanPropertyRowMapper<>(Mpa.class))
                 .stream()
-                .findAny()
-                .orElse(null);
+                .findAny().orElse(null);
+
         if (mpa == null) {
-            throw new NotFoundException("Не найден рейтинг по id - " + id);
+            throw new NotFoundException("Рейтинг по id - " + id + " не найден");
         }
         return mpa;
     }

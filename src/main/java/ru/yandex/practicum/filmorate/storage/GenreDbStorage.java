@@ -13,13 +13,13 @@ import java.util.List;
 import java.util.Set;
 
 @Slf4j
-@Component("GenreDBStorage")
-public class GenreDBStorage extends Storage<Genre> {
+@Component("GenreDbStorage")
+public class GenreDbStorage extends Storage<Genre> {
 
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public GenreDBStorage(JdbcTemplate jdbcTemplate) {
+    public GenreDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -33,22 +33,22 @@ public class GenreDBStorage extends Storage<Genre> {
     @Override
     public Genre getEntityById(int id) {
         log.info("Запрос жанра по id - {}", id);
-
         String sql = "SELECT * FROM genres WHERE id = ?";
         Genre genre = jdbcTemplate.query(sql, new Object[]{id},
                         new BeanPropertyRowMapper<>(Genre.class))
                 .stream()
                 .findAny()
                 .orElse(null);
-
         if (genre == null) {
-            throw new NotFoundException("Не найден жанр по id - " + id);
+            throw new NotFoundException("Жанр по id - " + id + " не найден");
         }
         return genre;
     }
 
     public Set<Genre> getAllGenresByFilmId(int id) {
-        String sql = "SELECT genres.id, genres.name FROM film_genre INNER JOIN genres ON film_genre.genre_id = genres.id WHERE film_genre.film_id = ?";
+        String sql = "SELECT genres.id, genres.name FROM film_genre " +
+                "INNER JOIN genres ON film_genre.genre_id = genres.id " +
+                "WHERE film_genre.film_id = ? ORDER BY genres.id";
         return new HashSet<>(jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Genre.class), id));
     }
 

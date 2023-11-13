@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,11 +12,15 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
+import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,22 +35,35 @@ class UserControllerTest {
     @Autowired
     ObjectMapper objectMapper;
 
-    @Autowired
-    Controller<User> userController;
+    @Mock
+    UserController userController = new UserController(new UserService(new InMemoryUserStorage(),
+            new InMemoryUserStorage())); // Чтобы не менять Qualifier
 
     User user;
+    User user2;
 
     @BeforeEach
     void setUp() {
-        user = new User("aaa@bbb.ccc", "login", "", LocalDate.of(2000, 1, 1));
+        user = User.builder()
+                .email("aaa@bbb.ccc")
+                .login("login")
+                .name("")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+        user2 = User.builder()
+                .email("aaa@bbb.eee")
+                .login("PasLogin")
+                .name("")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
     }
 
     @Test
     void shouldGetUsers() {
         userController.create(user);
-
-        User user2 = new User("aaa@bbb.eee", "PasLogin", "", LocalDate.of(2002, 1, 1));
         userController.create(user2);
+
+        doReturn(List.of(user, user2)).when(userController).get();
 
         Assertions.assertNotNull(userController.get(), "Список пользователей пустой");
         Assertions.assertEquals(2, userController.get().size(), "Неверное кол-во пользователей");
@@ -102,7 +120,12 @@ class UserControllerTest {
 
     @Test
     void shouldGet400WhenBirthdayIsIncorrect() throws Exception {
-        user = new User("aaa@bbb.eee", "PasLogin", "", LocalDate.of(3002, 1, 1));
+        user = User.builder()
+                .email("aaa@bbb.eee")
+                .login("PasLogin")
+                .name("")
+                .birthday(LocalDate.of(3002, 1, 1))
+                .build();
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -128,11 +151,93 @@ class UserControllerTest {
 
     @Test
     void shouldGet400WhenEmailIsIncorrect() throws Exception {
-        user = new User("bbb.ccc@", "login", "", LocalDate.of(2000, 1, 1));
+        user = User.builder()
+                .email("bbb.ccc@")
+                .login("PasLogin")
+                .name("")
+                .birthday(LocalDate.of(2000, 1, 1))
+                .build();
 
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void shouldCreateFriendshipByUsersIds() throws Exception {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user2)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(put("/users/1/friends/2")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldGet400WhenIncorrectParametersCreateFriendship() throws Exception {
+        mockMvc.perform(put("/users/-1/friends/2")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(put("/users/1/friends/-2")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldDeleteFriendshipByUsersIds() throws Exception {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user2)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(delete("/users/1/friends/2")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldGetFriendsByUserId() throws Exception {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user2)))
+                .andExpect(status().isOk());
+
+        user2.setId(2);
+
+        mockMvc.perform(put("/users/1/friends/2")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        when(userController.getFriends(1)).thenReturn(List.of(user2));
+
+        mockMvc.perform(get("/users/1/friends"))
+                .andExpect(status().isOk())
+                // Ожидаем, что возвращенный JSON содержит ожидаемый список друзей
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].email").value("aaa@bbb.eee"))
+                .andExpect(jsonPath("$[0].login").value("PasLogin"))
+                .andExpect(jsonPath("$[0].name").value("PasLogin"))
+                .andExpect(jsonPath("$[0].birthday").value("2000-01-01"));
+    }
+
 }

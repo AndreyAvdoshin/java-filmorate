@@ -37,10 +37,6 @@ public class User extends Entity {
         friends.add(id);
     }
 
-    public List<Integer> getFriends() {
-        return new ArrayList<>(friends);
-    }
-
     public void removeFriend(Integer id) {
         friends.remove(id);
     }

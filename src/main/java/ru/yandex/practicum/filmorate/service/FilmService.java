@@ -4,8 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.Storage;
 
 import java.util.Comparator;
@@ -16,48 +17,32 @@ import java.util.stream.Collectors;
 @Service
 public class FilmService extends BaseService<Film> {
 
-    @Autowired
-    public FilmService(@Qualifier("FilmDBStorage") Storage<Film> storage) {
-        super(storage);
-    }
+    Storage<User> userStorage;
+    LikeStorage likeStorage;
 
-    public Film getFilm(int id) {
-        checkFilm(id);
-        return storage.getEntityById(id);
+    @Autowired
+    public FilmService(@Qualifier("FilmDbStorage") Storage<Film> storage,
+                       @Qualifier("UserDbStorage") Storage<User> userStorage,
+                       @Qualifier("LikeDbStorage") LikeStorage likeStorage) {
+        super(storage);
+        this.userStorage = userStorage;
+        this.likeStorage = likeStorage;
     }
 
     public void addLike(int filmId, int userId) {
-        checkFilm(filmId);
-        storage.getEntityById(filmId).setLike(userId);
+        getEntity(filmId);
+        userStorage.getEntityById(userId);
+        likeStorage.addLike(filmId, userId);
     }
 
     public void deleteLike(int filmId, int userId) {
-        checkFilm(filmId);
-        storage.getEntityById(filmId).removeLike(userId);
+        getEntity(filmId);
+        userStorage.getEntityById(userId);
+        likeStorage.deleteLike(filmId, userId);
     }
 
     public List<Film> getRatedFilms(int count) {
-        List<Film> films = storage.get();
-        films.sort(Comparator.comparingInt(Film::getLikesCount).reversed());
-        return films.stream().limit(count).collect(Collectors.toList());
-    }
-
-    public void checkFilm(int filmId) {
-        Film film = storage.getEntityById(filmId);
-        if (film == null) {
-            log.debug("Запрос фильма по id - {}", filmId);
-            throw new NotFoundException("Фильм с id " + filmId + " не найден");
-        }
-    }
-
-    @Override
-    public Film getEntity(int id) {
-        Film film = storage.getEntityById(id);
-        if (film == null) {
-            log.debug("Запрос фильма по id - {}", id);
-            throw new NotFoundException("Фильм с id " + id + " не найден");
-        }
-        return film;
+        return likeStorage.getRatedFilms(count);
     }
 
 }

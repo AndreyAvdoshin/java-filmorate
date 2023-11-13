@@ -14,8 +14,12 @@ class ValidatorTest {
 
     @Test
     void shouldValidateFilmWithIncorrectReleaseDate() {
-        Film film = new Film("Неправильный фильм", "Описание фильма с неправильной датой",
-                LocalDate.of(1001, 2, 2), 90);
+        Film film = Film.builder()
+                .name("Неправильный фильм")
+                .description("Описание фильма с неправильной датой")
+                .releaseDate(LocalDate.of(1001, 2, 2))
+                .duration(90)
+                .build();
         ValidationException exception = assertThrows(ValidationException.class, () -> Validator.validate(film));
 
         assertEquals("Дата релиза не должда быть раньше 28 декабря 1895 года", exception.getMessage());

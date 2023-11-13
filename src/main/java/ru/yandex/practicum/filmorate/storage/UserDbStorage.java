@@ -7,22 +7,35 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
-@Component("UserDBStorage")
+@Component("UserDbStorage")
 public class UserDbStorage extends Storage<User> {
 
     private final JdbcTemplate jdbcTemplate;
+    private final FriendStorage friendStorage;
 
     @Autowired
-    public UserDbStorage(JdbcTemplate jdbcTemplate) {
+    public UserDbStorage(JdbcTemplate jdbcTemplate, FriendStorage friendStorage) {
         this.jdbcTemplate = jdbcTemplate;
+        this.friendStorage = friendStorage;
+    }
+
+    @Override
+    public List<User> get() {
+        log.info("Запрос всех пользователей");
+        String sql = "SELECT * FROM users";
+        return jdbcTemplate.query(sql, new UserMapper(friendStorage));
     }
 
     @Override
@@ -50,24 +63,13 @@ public class UserDbStorage extends Storage<User> {
 
     @Override
     public User getEntityById(int id) {
-        log.info("Запрос пользоваателя по id - {}", id);
+        log.info("Запрос пользователя по id - {}", id);
         String sql = "SELECT * FROM users WHERE id = ?";
         try {
-            return jdbcTemplate.queryForObject(sql, new Object[]{id}, this::mapRowToUser);
+            return jdbcTemplate.queryForObject(sql, new Object[]{id}, new UserMapper(friendStorage));
         } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("User не найден по id - " + id);
+            throw new NotFoundException("Пользователь не найден по id - " + id);
         }
     }
 
-    public User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
-        User user = User.builder()
-                .name(resultSet.getString("name"))
-                .login(resultSet.getString("login"))
-                .email(resultSet.getString("email"))
-                .birthday(resultSet.getDate("birthday").toLocalDate())
-                .friends(new HashSet<>())
-                .build();
-        user.setId(resultSet.getInt("id"));
-        return user;
-    }
 }

@@ -2,19 +2,20 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Entity;
+import ru.yandex.practicum.filmorate.model.Film;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.swing.text.html.Option;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public abstract class Storage<T extends Entity> {
 
-    private final Map<Integer, T> entities = new HashMap<>();
+    final Map<Integer, T> entities = new HashMap<>();
     private int id = 0;
 
     public List<T> get() {
@@ -30,14 +31,15 @@ public abstract class Storage<T extends Entity> {
 
     public T update(T entity) {
         entities.put(entity.getId(), entity);
-        return entities.get(entity.getId());
+        return entity;
     }
 
     public T getEntityById(int id) {
-        return entities.get(id);
+        T entity = entities.get(id);
+        if (entity == null) {
+            throw new NotFoundException("Объект по id - " + id + " не найден");
+        }
+        return entity;
     }
 
-//    public List<T> getAll() {
-//        return new ArrayList<>(entities.values());
-//    }
 }
