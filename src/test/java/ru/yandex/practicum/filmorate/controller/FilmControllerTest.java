@@ -48,7 +48,7 @@ class FilmControllerTest {
                 .description("Описание")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(100)
-                .mpa(Mpa.builder().id(1).name("Комедия").build())
+                .mpa(Mpa.builder().id(1).name("G").build())
                 .likes(new HashSet<>())
                 .genres(new HashSet<>())
                 .build();

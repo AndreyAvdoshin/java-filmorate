@@ -11,11 +11,7 @@ import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Component("FilmDbStorage")
@@ -55,7 +51,6 @@ public class FilmDbStorage extends Storage<Film> {
         for (Genre genre : film.getGenres()) {
             jdbcTemplate.update(sql, key.intValue(), genre.getId());
         }
-
 
         film.setGenres(genreDBStorage.getAllGenresByFilmId(film.getId()));
         log.info("Сохранен фильм: {}", film);

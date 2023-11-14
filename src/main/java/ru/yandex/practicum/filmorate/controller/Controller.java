@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.service.Validator;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 public abstract class Controller<T extends Entity> {

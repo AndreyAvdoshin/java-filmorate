@@ -7,26 +7,20 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Component("UserDbStorage")
 public class UserDbStorage extends Storage<User> {
 
     private final JdbcTemplate jdbcTemplate;
-    private final FriendStorage friendStorage;
+    private final FriendDbStorage friendStorage;
 
     @Autowired
-    public UserDbStorage(JdbcTemplate jdbcTemplate, FriendStorage friendStorage) {
+    public UserDbStorage(JdbcTemplate jdbcTemplate, FriendDbStorage friendStorage) {
         this.jdbcTemplate = jdbcTemplate;
         this.friendStorage = friendStorage;
     }
@@ -46,7 +40,7 @@ public class UserDbStorage extends Storage<User> {
         Number key = simpleJdbcInsert.executeAndReturnKey(user.toMap());
 
         user.setId(key.intValue());
-        log.info("Сохранен пользоваатель: {}", user);
+        log.info("Сохранен пользователь: {}", user);
         return user;
     }
 

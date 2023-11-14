@@ -48,7 +48,6 @@ public class User extends Entity {
         values.put("email", email);
         values.put("login", login);
         values.put("birthday", birthday);
-        values.put("friends", getFriends());
         values.put("created", LocalDateTime.now());
 
         return  values;
