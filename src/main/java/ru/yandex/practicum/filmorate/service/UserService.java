@@ -2,11 +2,9 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FriendStorage;
+import ru.yandex.practicum.filmorate.storage.FriendDbStorage;
 import ru.yandex.practicum.filmorate.storage.Storage;
 
 import java.util.List;
@@ -15,32 +13,31 @@ import java.util.List;
 @Service
 public class UserService extends BaseService<User> {
 
-    final FriendStorage friendStorage;
+    private final FriendDbStorage friendDbStorage;
 
-    @Autowired
-    public UserService(@Qualifier("UserDbStorage") Storage<User> storage, @Qualifier("FriendDbStorage") FriendStorage friendStorage) {
+    public UserService(Storage<User> storage, FriendDbStorage friendDbStorage) {
         super(storage);
-        this.friendStorage = friendStorage;
+        this.friendDbStorage = friendDbStorage;
     }
 
     public void createFriendship(int firstUserId, int secondUserId) {
         checkUsers(firstUserId, secondUserId);
-        friendStorage.createFriendship(firstUserId, secondUserId);
+        friendDbStorage.createFriendship(firstUserId, secondUserId);
     }
 
     public void deleteFriend(int firstUserId, int secondUserId) {
         checkUsers(firstUserId, secondUserId);
-        friendStorage.deleteFriend(firstUserId, secondUserId);
+        friendDbStorage.deleteFriend(firstUserId, secondUserId);
     }
 
     public List<User> getFriends(int id) {
-        return friendStorage.getFriends(id);
+        return friendDbStorage.getFriends(id);
     }
 
     public List<User> getCommonFriends(int id, int otherId) {
         checkUsers(id, otherId);
 
-        return friendStorage.getCommonFriends(id, otherId);
+        return friendDbStorage.getCommonFriends(id, otherId);
     }
 
     public User checkName(@NonNull User user) {

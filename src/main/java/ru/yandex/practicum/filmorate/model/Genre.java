@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -13,4 +16,10 @@ public class Genre extends Entity {
 
     private int id;
     private String name;
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("name", name);
+        return  values;
+    }
 }

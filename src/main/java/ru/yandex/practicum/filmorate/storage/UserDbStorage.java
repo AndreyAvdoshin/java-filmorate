@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
@@ -13,8 +13,8 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.List;
 
 @Slf4j
-@Component("UserDbStorage")
-public class UserDbStorage extends Storage<User> {
+@Component
+public class UserDbStorage implements Storage<User> {
 
     private final JdbcTemplate jdbcTemplate;
     private final FriendDbStorage friendStorage;
@@ -61,7 +61,7 @@ public class UserDbStorage extends Storage<User> {
         String sql = "SELECT * FROM users WHERE id = ?";
         try {
             return jdbcTemplate.queryForObject(sql, new Object[]{id}, new UserMapper(friendStorage));
-        } catch (EmptyResultDataAccessException e) {
+        } catch (IncorrectResultSizeDataAccessException e) {
             throw new NotFoundException("Пользователь не найден по id - " + id);
         }
     }

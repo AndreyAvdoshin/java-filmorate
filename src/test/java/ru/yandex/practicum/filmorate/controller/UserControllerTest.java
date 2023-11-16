@@ -1,10 +1,10 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,14 +12,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
-import java.util.List;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class UserControllerTest {
 
     @Autowired
@@ -35,9 +31,8 @@ class UserControllerTest {
     @Autowired
     ObjectMapper objectMapper;
 
-    @Mock
-    UserController userController = new UserController(new UserService(new InMemoryUserStorage(),
-            new InMemoryUserStorage())); // Чтобы не менять Qualifier
+    @Autowired
+    UserController userController;
 
     User user;
     User user2;
@@ -62,8 +57,6 @@ class UserControllerTest {
     void shouldGetUsers() {
         userController.create(user);
         userController.create(user2);
-
-        doReturn(List.of(user, user2)).when(userController).get();
 
         Assertions.assertNotNull(userController.get(), "Список пользователей пустой");
         Assertions.assertEquals(2, userController.get().size(), "Неверное кол-во пользователей");
@@ -226,8 +219,6 @@ class UserControllerTest {
         mockMvc.perform(put("/users/1/friends/2")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-
-        when(userController.getFriends(1)).thenReturn(List.of(user2));
 
         mockMvc.perform(get("/users/1/friends"))
                 .andExpect(status().isOk())

@@ -1,12 +1,10 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.LikeStorage;
+import ru.yandex.practicum.filmorate.storage.LikeDbStorage;
 import ru.yandex.practicum.filmorate.storage.Storage;
 
 import java.util.List;
@@ -16,31 +14,28 @@ import java.util.List;
 public class FilmService extends BaseService<Film> {
 
     Storage<User> userStorage;
-    LikeStorage likeStorage;
+    LikeDbStorage likeDbStorage;
 
-    @Autowired
-    public FilmService(@Qualifier("FilmDbStorage") Storage<Film> storage,
-                       @Qualifier("UserDbStorage") Storage<User> userStorage,
-                       @Qualifier("LikeDbStorage") LikeStorage likeStorage) {
+    public FilmService(Storage<Film> storage, Storage<User> userStorage, LikeDbStorage likeDbStorage) {
         super(storage);
         this.userStorage = userStorage;
-        this.likeStorage = likeStorage;
+        this.likeDbStorage = likeDbStorage;
     }
 
     public void addLike(int filmId, int userId) {
         getEntity(filmId);
         userStorage.getEntityById(userId);
-        likeStorage.addLike(filmId, userId);
+        likeDbStorage.addLike(filmId, userId);
     }
 
     public void deleteLike(int filmId, int userId) {
         getEntity(filmId);
         userStorage.getEntityById(userId);
-        likeStorage.deleteLike(filmId, userId);
+        likeDbStorage.deleteLike(filmId, userId);
     }
 
     public List<Film> getRatedFilms(int count) {
-        return likeStorage.getRatedFilms(count);
+        return likeDbStorage.getRatedFilms(count);
     }
 
 }

@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,9 +14,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -27,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmControllerTest {
 
     @Autowired
@@ -35,8 +34,8 @@ class FilmControllerTest {
     @Autowired
     ObjectMapper objectMapper;
 
-    FilmController filmController = new FilmController(new FilmService(new InMemoryFilmStorage(),
-            new InMemoryUserStorage(), new InMemoryFilmStorage())); // Чтобы не менять Qualifier
+    @Autowired
+    FilmController filmController;
 
     Film film;
     User user;
