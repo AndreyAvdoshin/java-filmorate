@@ -2,73 +2,42 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.FriendDbStorage;
 import ru.yandex.practicum.filmorate.storage.Storage;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class UserService extends BaseService<User> {
 
-    @Autowired
-    public UserService(Storage<User> storage) {
-        super(storage);
-    }
+    private final FriendDbStorage friendDbStorage;
 
-    public User getUser(int id) {
-        User user = storage.getEntityById(id);
-        if (user == null) {
-            log.debug("Не найден пользователь по id - {}", id);
-            throw new NotFoundException("Пользователь с id " + id + " не найден");
-        }
-        return user;
+    public UserService(Storage<User> storage, FriendDbStorage friendDbStorage) {
+        super(storage);
+        this.friendDbStorage = friendDbStorage;
     }
 
     public void createFriendship(int firstUserId, int secondUserId) {
         checkUsers(firstUserId, secondUserId);
-
-        getEntity(firstUserId).setFriend(secondUserId);
-        getEntity(secondUserId).setFriend(firstUserId);
+        friendDbStorage.createFriendship(firstUserId, secondUserId);
     }
 
     public void deleteFriend(int firstUserId, int secondUserId) {
         checkUsers(firstUserId, secondUserId);
-
-        getEntity(firstUserId).removeFriend(secondUserId);
-        getEntity(secondUserId).removeFriend(firstUserId);
+        friendDbStorage.deleteFriend(firstUserId, secondUserId);
     }
 
     public List<User> getFriends(int id) {
-        User user = getEntity(id);
-
-        if (user == null) {
-            log.debug("Не найден пользователь по id - {}", id);
-            throw new NotFoundException("Пользователь с id " + id + " не найден");
-        }
-
-        return user.getFriends()
-                .stream()
-                .map(storage::getEntityById)
-                .collect(Collectors.toList());
+        return friendDbStorage.getFriends(id);
     }
 
     public List<User> getCommonFriends(int id, int otherId) {
         checkUsers(id, otherId);
 
-        List<User> commonFriends = new ArrayList<>();
-        List<Integer> firstFriendsList = storage.getEntityById(id).getFriends();
-        for (Integer i : storage.getEntityById(otherId).getFriends()) {
-            if (firstFriendsList.contains(i)) {
-                commonFriends.add(getEntity(i));
-            }
-        }
-        return commonFriends;
+        return friendDbStorage.getCommonFriends(id, otherId);
     }
 
     public User checkName(@NonNull User user) {
@@ -79,24 +48,7 @@ public class UserService extends BaseService<User> {
     }
 
     public void checkUsers(int firstUserId, int secondUserId) {
-        User firstUser = getEntity(firstUserId);
-        User secondUser = getEntity(secondUserId);
-
-        if (firstUser == null) {
-            log.debug("Не найден первый друг по id - {}", firstUserId);
-            throw new NotFoundException("Пользователь с id " + firstUserId + " не найден");
-        } else if (secondUser == null) {
-            log.debug("Не найден второй друг по id - {}", firstUserId);
-            throw new NotFoundException("Пользователь с id " + secondUserId + " не найден");
-        }
-    }
-
-    @Override
-    public User getEntity(int id) {
-        if (storage.getEntityById(id) == null) {
-            log.debug("Не найден пользователь по id - {}", id);
-            throw new NotFoundException("Пользователь с id - " + id + " не найден");
-        }
-        return super.getEntity(id);
+        getEntity(firstUserId);
+        getEntity(secondUserId);
     }
 }

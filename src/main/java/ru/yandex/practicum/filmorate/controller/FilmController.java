@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -18,15 +17,9 @@ public class FilmController extends Controller<Film> {
 
     private final FilmService service;
 
-    @Autowired
     public FilmController(FilmService service) {
         super(service);
         this.service = service;
-    }
-
-    @GetMapping("/{id}")
-    public Film getUser(@PathVariable int id) {
-        return service.getFilm(id);
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -43,7 +36,7 @@ public class FilmController extends Controller<Film> {
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable int id, @PathVariable int userId) {
          if (userId <= 0) {
-            throw new NotFoundException("Пользователь с id - " + id + " не найден");
+            throw new NotFoundException("Пользователь с id - " + userId + " не найден");
         }
         service.deleteLike(id, userId);
     }

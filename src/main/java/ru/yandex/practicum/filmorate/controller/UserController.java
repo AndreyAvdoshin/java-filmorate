@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -17,15 +16,9 @@ public class UserController extends Controller<User> {
 
     private final UserService service;
 
-    @Autowired
     public UserController(UserService service) {
         super(service);
         this.service = service;
-    }
-
-    @GetMapping("/{id}")
-    public User getUser(@PathVariable int id) {
-        return service.getUser(id);
     }
 
     @Override

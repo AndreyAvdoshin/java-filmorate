@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Entity;
 import ru.yandex.practicum.filmorate.storage.Storage;
@@ -15,7 +14,6 @@ public abstract class BaseService<T extends Entity> {
 
     protected final Storage<T> storage;
 
-    @Autowired
     public BaseService(Storage<T> storage) {
         this.storage = storage;
     }
