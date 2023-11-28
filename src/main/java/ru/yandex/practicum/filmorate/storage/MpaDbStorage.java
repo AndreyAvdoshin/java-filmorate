@@ -53,6 +53,10 @@ public class MpaDbStorage implements Storage<Mpa> {
     }
 
     @Override
+    public void delete(int id) {
+    }
+
+    @Override
     public Mpa getEntityById(int id) {
         log.info("Запрос рейтинга по id - {}", id);
         String sql = "SELECT * FROM mpa WHERE id = ?";

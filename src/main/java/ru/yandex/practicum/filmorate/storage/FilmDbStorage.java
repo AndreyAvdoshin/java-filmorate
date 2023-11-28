@@ -25,20 +25,30 @@ public class FilmDbStorage implements Storage<Film> {
     private final MpaDbStorage mpaDBStorage;
     private final GenreDbStorage genreDBStorage;
     private final LikeDbStorage likeDbStorage;
+    private final DirectorDbStorage directorDbStorage;
 
     @Autowired
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, MpaDbStorage mpaDBStorage, GenreDbStorage genreDBStorage, LikeDbStorage likeDbStorage) {
+    public FilmDbStorage(JdbcTemplate jdbcTemplate,
+                         MpaDbStorage mpaDBStorage,
+                         GenreDbStorage genreDBStorage,
+                         LikeDbStorage likeDbStorage,
+                         DirectorDbStorage directorDbStorage
+    ) {
         this.jdbcTemplate = jdbcTemplate;
         this.mpaDBStorage = mpaDBStorage;
         this.genreDBStorage = genreDBStorage;
         this.likeDbStorage = likeDbStorage;
+        this.directorDbStorage = directorDbStorage;
     }
 
     @Override
     public List<Film> get() {
         log.info("Запрос всех фильмов");
         String sql = "SELECT * FROM films, mpa WHERE films.mpa_id = mpa.id";
-        return jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, likeDbStorage));
+        return jdbcTemplate.query(sql, new FilmMapper(
+                genreDBStorage,
+                likeDbStorage,
+                directorDbStorage));
     }
 
     @Override
@@ -95,11 +105,19 @@ public class FilmDbStorage implements Storage<Film> {
     }
 
     @Override
+    public void delete(int id) {
+    }
+
+    @Override
     public Film getEntityById(int id) {
         log.info("Запрос фильма по id - {}", id);
         String sql = "SELECT * FROM films, mpa WHERE films.mpa_id = mpa.id AND films.id = ?";
         try {
-            return jdbcTemplate.queryForObject(sql, new Object[]{id}, new FilmMapper(genreDBStorage, likeDbStorage));
+            return jdbcTemplate.queryForObject(sql,
+                    new Object[]{id},
+                    new FilmMapper(genreDBStorage,
+                            likeDbStorage,
+                            directorDbStorage));
         } catch (IncorrectResultSizeDataAccessException e) {
             throw new NotFoundException("Фильм по id " + id + " не найден");
         }

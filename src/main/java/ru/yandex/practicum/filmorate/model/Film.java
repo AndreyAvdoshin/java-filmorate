@@ -42,6 +42,8 @@ public class Film extends Entity {
 
     private Set<Genre> genres = new HashSet<>();
 
+    private Set<Director> directors = new HashSet<>();
+
     public void setLike(int id) {
         likes.add(id);
     }
