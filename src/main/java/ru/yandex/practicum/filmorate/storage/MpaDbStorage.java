@@ -44,7 +44,7 @@ public class MpaDbStorage implements Storage<Mpa> {
     @Override
     public Mpa update(Mpa mpa) {
         String sql = "UPDATE mpa SET name = ? WHERE id = ?";
-        int count = jdbcTemplate.update(sql, mpa.getName());
+        int count = jdbcTemplate.update(sql, mpa.getName(), mpa.getId());
         if (count == 0) {
             throw new NotFoundException("Рейтинг по id " + mpa.getId() + " не найден");
         }

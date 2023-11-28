@@ -47,7 +47,7 @@ public class GenreDbStorage implements Storage<Genre> {
     @Override
     public Genre update(Genre genre) {
         String sql = "UPDATE genres SET name = ? WHERE id = ?";
-        int count = jdbcTemplate.update(sql, genre.getName());
+        int count = jdbcTemplate.update(sql, genre.getName(), genre.getId());
         if (count == 0) {
             throw new NotFoundException("Жанр по id " + genre.getId() + " не найден");
         }
