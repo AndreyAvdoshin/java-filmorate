@@ -16,4 +16,7 @@ public class GenreController extends Controller<Genre> {
         this.service = service;
     }
 
+    @Override
+    public void delete(int id) {
+    }
 }
