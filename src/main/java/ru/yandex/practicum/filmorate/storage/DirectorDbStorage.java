@@ -54,6 +54,7 @@ public class DirectorDbStorage implements Storage<Director> {
         return director;
     }
 
+    @Override
     public void delete(int id) {
         String sql = "DELETE FROM directors WHERE id = ?";
         int count = jdbcTemplate.update(sql, id);
