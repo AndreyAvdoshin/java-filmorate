@@ -141,6 +141,12 @@ public class FilmDbStorage implements Storage<Film> {
 
     @Override
     public void delete(int id) {
+        String sql = "DELETE FROM films WHERE id = ?";
+        int count = jdbcTemplate.update(sql, id);
+        if (count == 0) {
+            throw new NotFoundException("Фильм по id " + id + " не найден");
+        }
+        log.info("Удален фильм по id - {}", id);
     }
 
     @Override

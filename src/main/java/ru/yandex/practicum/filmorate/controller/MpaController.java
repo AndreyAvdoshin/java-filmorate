@@ -16,4 +16,7 @@ public class MpaController extends Controller<Mpa> {
         this.service = service;
     }
 
+    @Override
+    public void delete(int id) {
+    }
 }

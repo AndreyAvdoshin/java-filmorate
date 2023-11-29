@@ -11,8 +11,4 @@ public class DirectorService extends BaseService<Director> {
     public DirectorService(Storage<Director> storage) {
         super(storage);
     }
-
-    public void delete(Integer id) {
-        storage.delete(id);
-    }
 }
