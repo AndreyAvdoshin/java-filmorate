@@ -50,6 +50,7 @@ class FilmControllerTest {
                 .mpa(Mpa.builder().id(1).name("G").build())
                 .likes(new HashSet<>())
                 .genres(new HashSet<>())
+                .directors(new HashSet<>())
                 .build();
 
         user = User.builder()
@@ -72,6 +73,7 @@ class FilmControllerTest {
                 .mpa(Mpa.builder().id(1).name("Комедия").build())
                 .likes(new HashSet<>())
                 .genres(new HashSet<>())
+                .directors(new HashSet<>())
                 .build();
 
         filmController.create(film2);

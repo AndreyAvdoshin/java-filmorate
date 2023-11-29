@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -65,21 +66,36 @@ public class FilmDbStorage implements Storage<Film> {
         for (Genre genre : film.getGenres()) {
             jdbcTemplate.update(sql, key.intValue(), genre.getId());
         }
+        sql = "INSERT INTO film_director (film_id, director_id) VALUES (?, ?)";
+        for (Director director : film.getDirectors()) {
+            jdbcTemplate.update(sql, key.intValue(), director.getId());
+        }
 
         film.setGenres(genreDBStorage.getAllGenresByFilmId(film.getId()));
+        film.setDirectors(directorDbStorage.getAllDirectorsByFilmId(film.getId()));
         log.info("Сохранен фильм: {}", film);
         return film;
     }
 
     @Override
     public Film update(Film film) {
-        String sql = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? WHERE id = ?";
-        int count = jdbcTemplate.update(sql, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), film.getId());
+        String sql = "UPDATE films " +
+                "SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? " +
+                "WHERE id = ?";
+        int count = jdbcTemplate.update(sql,
+                film.getName(),
+                film.getDescription(),
+                film.getReleaseDate(),
+                film.getDuration(),
+                film.getMpa().getId(),
+                film.getId());
         if (count == 0) {
             throw new NotFoundException("Фильм по id " + film.getId() + " не найден");
         }
-        // Перезаписываем жанры
+        // Перезаписываем жанры и режиссеров
         sql = "DELETE film_genre WHERE film_id = ?";
+        jdbcTemplate.update(sql, film.getId());
+        sql = "DELETE film_director WHERE film_id = ?";
         jdbcTemplate.update(sql, film.getId());
 
         //Получение id всех жанров фильма
@@ -98,8 +114,27 @@ public class FilmDbStorage implements Storage<Film> {
             }
         });
 
+        //Получение id всех режиссеров фильма
+        List<Integer> directors = film.getDirectors().stream()
+                .map(Director::getId)
+                .collect(Collectors.toList());
+        sql = "INSERT INTO film_director (film_id, director_id) VALUES (?, ?)";
+        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setInt(1, film.getId());
+                ps.setInt(2, directors.get(i));
+            }
+
+            @Override
+            public int getBatchSize() {
+                return directors.size();
+            }
+        });
+
         film.setMpa(mpaDBStorage.getEntityById(film.getMpa().getId()));
         film.setGenres(genreDBStorage.getAllGenresByFilmId(film.getId()));
+        film.setDirectors(directorDbStorage.getAllDirectorsByFilmId(film.getId()));
         log.info("Обновлен фильм по id - {}", film.getId());
         return film;
     }
@@ -121,6 +156,18 @@ public class FilmDbStorage implements Storage<Film> {
         } catch (IncorrectResultSizeDataAccessException e) {
             throw new NotFoundException("Фильм по id " + id + " не найден");
         }
+    }
+
+    public List<Film> getDirectorFilms(int directorId) {
+        log.info("Запрос всех фильмов режиссера - {}", directorId);
+        String sql = "SELECT films.*, mpa.* " +
+                "FROM film_director fd " +
+                "LEFT JOIN films ON fd.film_id = films.id " +
+                "RIGHT JOIN directors d ON fd.director_id = d.id " +
+                "INNER JOIN mpa ON films.mpa_id = mpa.id " +
+                "WHERE d.id = ? " +
+                "ORDER BY films.release_date ASC";
+        return jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, likeDbStorage, directorDbStorage), directorId);
     }
 
 }

@@ -46,7 +46,7 @@ public class DirectorDbStorage implements Storage<Director> {
     @Override
     public Director update(Director director) {
         String sql = "UPDATE directors SET name = ? WHERE id = ?";
-        int count = jdbcTemplate.update(sql, director.getName());
+        int count = jdbcTemplate.update(sql, director.getName(), director.getId());
         if (count == 0) {
             throw new NotFoundException("Режиссер по id " + director.getId() + " не найден");
         }
@@ -75,7 +75,8 @@ public class DirectorDbStorage implements Storage<Director> {
     }
 
     public Set<Director> getAllDirectorsByFilmId(int id) {
-        String sql = "SELECT g.id, g.name " +
+        log.info("Запрос всех режиссеров фильма по id - {}", id);
+        String sql = "SELECT d.id, d.name " +
                 "FROM film_director fd " +
                 "LEFT JOIN films f ON fd.film_id = f.id " +
                 "RIGHT JOIN directors d ON fd.director_id = d.id " +

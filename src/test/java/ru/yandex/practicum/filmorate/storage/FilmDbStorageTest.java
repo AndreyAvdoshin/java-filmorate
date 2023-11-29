@@ -20,7 +20,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @JdbcTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @ContextConfiguration(classes = {MpaDbStorage.class, GenreDbStorage.class, LikeDbStorage.class, FilmDbStorage.class,
-        UserDbStorage.class, FriendDbStorage.class})
+        UserDbStorage.class, FriendDbStorage.class, DirectorDbStorage.class})
 public class FilmDbStorageTest {
 
     private final JdbcTemplate jdbcTemplate;
@@ -44,6 +44,7 @@ public class FilmDbStorageTest {
                 .mpa(mpaDBStorage.getEntityById(1))
                 .likes(new HashSet<>())
                 .genres(new HashSet<>())
+                .directors(new HashSet<>())
                 .build();
 
         updatedFilm = Film.builder()
@@ -54,6 +55,7 @@ public class FilmDbStorageTest {
                 .mpa(mpaDBStorage.getEntityById(2))
                 .likes(new HashSet<>())
                 .genres(new HashSet<>())
+                .directors(new HashSet<>())
                 .build();
 
         user = User.builder()
