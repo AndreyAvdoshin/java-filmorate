@@ -5,8 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
@@ -17,14 +17,13 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @JdbcTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @ContextConfiguration(classes = {MpaDbStorage.class, GenreDbStorage.class, LikeDbStorage.class, FilmDbStorage.class,
         UserDbStorage.class, FriendDbStorage.class, DirectorDbStorage.class})
 public class FilmDbStorageTest {
-
-    private final JdbcTemplate jdbcTemplate;
     private final MpaDbStorage mpaDBStorage;
     private final GenreDbStorage genreDBStorage;
     private final LikeDbStorage likeStorage;
@@ -87,6 +86,17 @@ public class FilmDbStorageTest {
                 .isNotNull()
                 .usingRecursiveComparison()
                 .isEqualTo(updatedFilm);
+    }
+
+    @Test
+    void shouldDeleteFilm() {
+        film = filmDbStorage.create(film);
+        filmDbStorage.delete(film.getId());
+
+        final NotFoundException exception = assertThrows(
+                NotFoundException.class,
+                () -> filmDbStorage.getEntityById(film.getId())
+        );
     }
 
     @Test
