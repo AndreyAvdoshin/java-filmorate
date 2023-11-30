@@ -55,7 +55,6 @@ public class UserService extends BaseService<User> {
     }
 
     public List<Film> getRecommendations(int id) {
-        getEntity(id);
         return filmDbStorage.getRecommendations(id);
     }
 }

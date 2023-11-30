@@ -198,17 +198,18 @@ public class FilmDbStorageTest {
 
     @Test
     void getRecommendations() {
-        filmDbStorage.create(film);
-        filmDbStorage.create(nextFilm);
-        filmDbStorage.create(lastFilm);
-        userDbStorage.create(user);
-        userDbStorage.create(lastUser);
-        likeStorage.addLike(1,1);
-        likeStorage.addLike(2,1);
-        likeStorage.addLike(3,1);
-        likeStorage.addLike(1,2);
-        likeStorage.addLike(2,2);
-        List<Film> recommends = filmDbStorage.getRecommendations(2);
+        film = filmDbStorage.create(film);
+        nextFilm = filmDbStorage.create(nextFilm);
+        lastFilm = filmDbStorage.create(lastFilm);
+        user = userDbStorage.create(user);
+        lastUser = userDbStorage.create(lastUser);
+
+        likeStorage.addLike(film.getId(),user.getId());
+        likeStorage.addLike(nextFilm.getId(),user.getId());
+        likeStorage.addLike(lastFilm.getId(),user.getId());
+        likeStorage.addLike(film.getId(),lastUser.getId());
+        likeStorage.addLike(nextFilm.getId(),lastUser.getId());
+        List<Film> recommends = filmDbStorage.getRecommendations(lastUser.getId());
         assertEquals(recommends.size(),1, "Не совпадает размер");
         assertEquals(recommends.get(0).getName(), lastFilm.getName(), "Не совпадает название");
     }
