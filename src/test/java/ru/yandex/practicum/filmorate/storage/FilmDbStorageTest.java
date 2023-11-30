@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -29,6 +30,7 @@ public class FilmDbStorageTest {
     private final LikeDbStorage likeStorage;
     private final FilmDbStorage filmDbStorage;
     private final UserDbStorage userDbStorage;
+    private final DirectorDbStorage directorDbStorage;
 
     Film film;
     Film updatedFilm;
@@ -167,4 +169,20 @@ public class FilmDbStorageTest {
                 .isEqualTo(updatedFilm);
     }
 
+    @Test
+    void shouldGetDirectorFilms() {
+        Director director1 = Director.builder().name("Новый режиссер").build();
+        Director director2 = Director.builder().name("Обновленный режиссер").build();
+        director1 = directorDbStorage.create(director1);
+        director2 = directorDbStorage.create(director2);
+
+        film.setDirectors(Set.of(director1));
+        filmDbStorage.create(film);
+        updatedFilm.setDirectors(Set.of(director2, director1));
+        filmDbStorage.create(updatedFilm);
+
+        assertThat(filmDbStorage.getDirectorFilms(director1.getId())).isNotNull()
+                .usingRecursiveComparison()
+                .isEqualTo(List.of(film, updatedFilm));
+    }
 }
