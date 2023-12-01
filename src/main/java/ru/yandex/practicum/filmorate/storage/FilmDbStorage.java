@@ -163,9 +163,8 @@ public class FilmDbStorage implements Storage<Film> {
         String sql = "SELECT films.*, mpa.* " +
                 "FROM film_director fd " +
                 "LEFT JOIN films ON fd.film_id = films.id " +
-                "RIGHT JOIN directors d ON fd.director_id = d.id " +
                 "INNER JOIN mpa ON films.mpa_id = mpa.id " +
-                "WHERE d.id = ? " +
+                "WHERE fd.director_id = ?" +
                 "ORDER BY films.release_date ASC";
         return jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, likeDbStorage, directorDbStorage), directorId);
     }
