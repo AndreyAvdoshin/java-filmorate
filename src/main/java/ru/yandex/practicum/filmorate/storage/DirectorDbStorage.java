@@ -77,11 +77,9 @@ public class DirectorDbStorage implements Storage<Director> {
 
     public Set<Director> getAllDirectorsByFilmId(int id) {
         log.info("Запрос всех режиссеров фильма по id - {}", id);
-        String sql = "SELECT d.id, d.name " +
-                "FROM film_director fd " +
-                "LEFT JOIN films f ON fd.film_id = f.id " +
-                "RIGHT JOIN directors d ON fd.director_id = d.id " +
-                "WHERE f.id = ? " +
+        String sql = "SELECT d.* " +
+                "FROM directors d, film_director fd " +
+                "WHERE d.id = fd.director_id AND fd.film_id = ? " +
                 "ORDER BY d.id";
         return new HashSet<>(jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Director.class), id));
     }
