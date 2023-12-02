@@ -173,7 +173,8 @@ public class FilmDbStorage implements Storage<Film> {
                 "AND l.user_id = ? " +
                 "ORDER BY (SELECT COUNT(*) FROM likes WHERE film_id = l.film_id) DESC";
         log.info("Запрос общих фильмов пользователей - {}, {}", id, friendId);
-        return jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, likeDbStorage), id, friendId, id);
+        return jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, likeDbStorage, directorDbStorage),
+                id, friendId, id);
     }
 
     public List<Film> getRecommendations(int userId) {
@@ -192,7 +193,7 @@ public class FilmDbStorage implements Storage<Film> {
         return jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, likeDbStorage, directorDbStorage),
                 userId, userId);
     }
-  
+
     public List<Film> getDirectorFilms(int directorId) {
         log.info("Запрос всех фильмов режиссера - {}", directorId);
         String sql = "SELECT films.*, mpa.* " +

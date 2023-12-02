@@ -99,6 +99,8 @@ public class FilmDbStorageTest {
                 .name("friendUser")
                 .birthday(LocalDate.of(1999, 1, 1))
                 .friends(new HashSet<>())
+                .build();
+
         lastUser = User.builder()
                 .email("bbb@bbb.ccc")
                 .login("loginLast")
