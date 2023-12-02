@@ -60,4 +60,10 @@ public class FilmService extends BaseService<Film> {
         return likeDbStorage.getRatedFilms(count);
     }
 
+    public List<Film> getCommonFilms(int id, int friendId) {
+        userStorage.getEntityById(id);
+        userStorage.getEntityById(friendId);
+        return filmDbStorage.getCommonFilms(id, friendId);
+    }
+
 }

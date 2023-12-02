@@ -164,6 +164,19 @@ public class FilmDbStorage implements Storage<Film> {
         }
     }
 
+    public List<Film> getCommonFilms(int id, int friendId) {
+        String sql = "SELECT f.*, mpa.* FROM likes l " +
+                "JOIN films f ON f.id = l.film_id " +
+                "JOIN mpa ON mpa.id = f.mpa_id " +
+                "WHERE l.film_id IN (SELECT l.film_id FROM likes l WHERE l.user_id IN (?, ?) " +
+                "GROUP BY l.film_id HAVING COUNT(l.film_id) > 1) " +
+                "AND l.user_id = ? " +
+                "ORDER BY (SELECT COUNT(*) FROM likes WHERE film_id = l.film_id) DESC";
+        log.info("Запрос общих фильмов пользователей - {}, {}", id, friendId);
+        return jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, likeDbStorage, directorDbStorage),
+                id, friendId, id);
+    }
+
     public List<Film> getRecommendations(int userId) {
         String sql = "SELECT f.*, MPA.ID, mpa.NAME " +
                      "FROM likes l JOIN films f on f.id = l.film_id " + "JOIN mpa on mpa.id = f.mpa_id " +
@@ -180,7 +193,7 @@ public class FilmDbStorage implements Storage<Film> {
         return jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, likeDbStorage, directorDbStorage),
                 userId, userId);
     }
-  
+
     public List<Film> getDirectorFilms(int directorId) {
         log.info("Запрос всех фильмов режиссера - {}", directorId);
         String sql = "SELECT films.*, mpa.* " +

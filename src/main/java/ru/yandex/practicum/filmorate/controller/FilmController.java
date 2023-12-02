@@ -51,6 +51,16 @@ public class FilmController extends Controller<Film> {
         return service.getRatedFilms(count);
     }
 
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam Integer userId, Integer friendId) {
+        if (userId <= 0) {
+            throw new IncorrectParameterException("userId");
+        } else if (friendId <= 0) {
+            throw new IncorrectParameterException("friendId");
+        }
+        return service.getCommonFilms(userId, friendId);
+    }
+
     @GetMapping("/director/{directorId}")
     public List<Film> getDirectorFilms(@PathVariable(name = "directorId") int directorId,
                                     @RequestParam(name = "sortBy",
@@ -64,5 +74,4 @@ public class FilmController extends Controller<Film> {
         }
         return service.getDirectorFilmsBySortField(directorId, sortField);
     }
-
 }
