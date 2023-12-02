@@ -60,6 +60,7 @@ public class FilmDbStorageTest {
                 .mpa(mpaDBStorage.getEntityById(1))
                 .likes(new HashSet<>())
                 .genres(new HashSet<>())
+                .directors(new HashSet<>())
                 .build();
 
         lastFilm = Film.builder()
@@ -70,6 +71,7 @@ public class FilmDbStorageTest {
                 .mpa(mpaDBStorage.getEntityById(1))
                 .likes(new HashSet<>())
                 .genres(new HashSet<>())
+                .directors(new HashSet<>())
                 .build();
 
         updatedFilm = Film.builder()
@@ -218,15 +220,17 @@ public class FilmDbStorageTest {
         user = userDbStorage.create(user);
         lastUser = userDbStorage.create(lastUser);
 
-        likeStorage.addLike(film.getId(),user.getId());
-        likeStorage.addLike(nextFilm.getId(),user.getId());
-        likeStorage.addLike(lastFilm.getId(),user.getId());
-        likeStorage.addLike(film.getId(),lastUser.getId());
-        likeStorage.addLike(nextFilm.getId(),lastUser.getId());
+        likeStorage.addLike(film.getId(), user.getId());
+        likeStorage.addLike(nextFilm.getId(), user.getId());
+        likeStorage.addLike(lastFilm.getId(), user.getId());
+        likeStorage.addLike(film.getId(), lastUser.getId());
+        likeStorage.addLike(nextFilm.getId(), lastUser.getId());
         List<Film> recommends = filmDbStorage.getRecommendations(lastUser.getId());
-        assertEquals(recommends.size(),1, "Не совпадает размер");
+        assertEquals(recommends.size(), 1, "Не совпадает размер");
         assertEquals(recommends.get(0).getName(), lastFilm.getName(), "Не совпадает название");
+    }
 
+    @Test
     void shouldGetDirectorFilms() {
         Director director1 = Director.builder().name("Новый режиссер").build();
         Director director2 = Director.builder().name("Обновленный режиссер").build();
