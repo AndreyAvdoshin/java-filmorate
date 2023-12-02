@@ -21,10 +21,14 @@ public class LikeDbStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private final GenreDbStorage genreDBStorage;
+    private final DirectorDbStorage directorDbStorage;
 
-    public LikeDbStorage(JdbcTemplate jdbcTemplate, GenreDbStorage genreDBStorage) {
+    public LikeDbStorage(JdbcTemplate jdbcTemplate,
+                         GenreDbStorage genreDBStorage,
+                         DirectorDbStorage directorDbStorage) {
         this.jdbcTemplate = jdbcTemplate;
         this.genreDBStorage = genreDBStorage;
+        this.directorDbStorage = directorDbStorage;
     }
 
     public void addLike(int filmId, int userId) {
@@ -52,7 +56,9 @@ public class LikeDbStorage {
                 "GROUP BY films.id " +
                 "ORDER BY COUNT(likes.user_id) DESC " +
                 "LIMIT ?";
-        return new ArrayList<>(jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, this), count));
+        return new ArrayList<>(jdbcTemplate.query(sql,
+                new FilmMapper(genreDBStorage, this, directorDbStorage),
+                count));
     }
 
     public Set<Integer> getLikesByFilmId(int id) {

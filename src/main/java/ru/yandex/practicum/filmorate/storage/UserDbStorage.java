@@ -56,6 +56,10 @@ public class UserDbStorage implements Storage<User> {
     }
 
     @Override
+    public void delete(int id) {
+    }
+
+    @Override
     public User getEntityById(int id) {
         log.info("Запрос пользователя по id - {}", id);
         String sql = "SELECT * FROM users WHERE id = ?";
