@@ -30,6 +30,10 @@ public abstract class BaseService<T extends Entity> {
         return storage.update(entity);
     }
 
+    public void delete(int id) {
+        storage.delete(id);
+    }
+
     public T getEntity(int id) {
         return storage.getEntityById(id);
     }

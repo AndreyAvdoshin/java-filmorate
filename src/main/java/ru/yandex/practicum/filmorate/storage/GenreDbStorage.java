@@ -56,6 +56,10 @@ public class GenreDbStorage implements Storage<Genre> {
     }
 
     @Override
+    public void delete(int id) {
+    }
+
+    @Override
     public Genre getEntityById(int id) {
         log.info("Запрос жанра по id - {}", id);
         String sql = "SELECT * FROM genres WHERE id = ?";

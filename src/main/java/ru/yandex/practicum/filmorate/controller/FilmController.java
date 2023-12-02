@@ -9,6 +9,8 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.List;
 
+import static ru.yandex.practicum.filmorate.Constants.FILM_SORT_FIELDS;
+
 
 @Slf4j
 @RestController
@@ -35,7 +37,7 @@ public class FilmController extends Controller<Film> {
 
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable int id, @PathVariable int userId) {
-         if (userId <= 0) {
+        if (userId <= 0) {
             throw new NotFoundException("Пользователь с id - " + userId + " не найден");
         }
         service.deleteLike(id, userId);
@@ -57,5 +59,19 @@ public class FilmController extends Controller<Film> {
             throw new IncorrectParameterException("friendId");
         }
         return service.getCommonFilms(userId, friendId);
+    }
+  
+    @GetMapping("/director/{directorId}")
+    public List<Film> getDirectorFilms(@PathVariable(name = "directorId") int directorId,
+                                    @RequestParam(name = "sortBy",
+                                            defaultValue = "year",
+                                            required = false) String sortField) {
+        if (directorId <= 0) {
+            throw new NotFoundException("Режиссер с id - " + directorId + " не найден");
+        }
+        if (!FILM_SORT_FIELDS.contains(sortField)) {
+            throw new IncorrectParameterException(sortField);
+        }
+        return service.getDirectorFilmsBySortField(directorId, sortField);
     }
 }

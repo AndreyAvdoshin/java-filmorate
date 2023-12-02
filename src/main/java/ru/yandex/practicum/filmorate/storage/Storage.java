@@ -12,6 +12,8 @@ public interface Storage<T extends Entity> {
 
     T update(T entity);
 
+    void delete(int id);
+
     T getEntityById(int id);
 
 }

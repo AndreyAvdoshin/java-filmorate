@@ -5,8 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -16,24 +17,28 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @JdbcTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @ContextConfiguration(classes = {MpaDbStorage.class, GenreDbStorage.class, LikeDbStorage.class, FilmDbStorage.class,
-        UserDbStorage.class, FriendDbStorage.class})
+        UserDbStorage.class, FriendDbStorage.class, DirectorDbStorage.class})
 public class FilmDbStorageTest {
-
-    private final JdbcTemplate jdbcTemplate;
     private final MpaDbStorage mpaDBStorage;
     private final GenreDbStorage genreDBStorage;
     private final LikeDbStorage likeStorage;
     private final FilmDbStorage filmDbStorage;
     private final UserDbStorage userDbStorage;
+    private final DirectorDbStorage directorDbStorage;
 
     Film film;
+    Film nextFilm;
+    Film lastFilm;
     Film updatedFilm;
     User user;
     User friendUser;
+    User lastUser;
 
     @BeforeEach
     void setUp() {
@@ -45,6 +50,29 @@ public class FilmDbStorageTest {
                 .mpa(mpaDBStorage.getEntityById(1))
                 .likes(new HashSet<>())
                 .genres(new HashSet<>())
+                .directors(new HashSet<>())
+                .build();
+
+        nextFilm = Film.builder()
+                .name("Второй фильм")
+                .description("Описание второго")
+                .releaseDate(LocalDate.of(2010, 1, 1))
+                .duration(100)
+                .mpa(mpaDBStorage.getEntityById(1))
+                .likes(new HashSet<>())
+                .genres(new HashSet<>())
+                .directors(new HashSet<>())
+                .build();
+
+        lastFilm = Film.builder()
+                .name("Третий фильм")
+                .description("Описание третьего")
+                .releaseDate(LocalDate.of(2020, 1, 1))
+                .duration(100)
+                .mpa(mpaDBStorage.getEntityById(1))
+                .likes(new HashSet<>())
+                .genres(new HashSet<>())
+                .directors(new HashSet<>())
                 .build();
 
         updatedFilm = Film.builder()
@@ -55,6 +83,7 @@ public class FilmDbStorageTest {
                 .mpa(mpaDBStorage.getEntityById(2))
                 .likes(new HashSet<>())
                 .genres(new HashSet<>())
+                .directors(new HashSet<>())
                 .build();
 
         user = User.builder()
@@ -70,6 +99,11 @@ public class FilmDbStorageTest {
                 .name("friendUser")
                 .birthday(LocalDate.of(1999, 1, 1))
                 .friends(new HashSet<>())
+        lastUser = User.builder()
+                .email("bbb@bbb.ccc")
+                .login("loginLast")
+                .name("Name")
+                .birthday(LocalDate.of(2010, 1, 1))
                 .build();
     }
 
@@ -92,6 +126,17 @@ public class FilmDbStorageTest {
                 .isNotNull()
                 .usingRecursiveComparison()
                 .isEqualTo(updatedFilm);
+    }
+
+    @Test
+    void shouldDeleteFilm() {
+        film = filmDbStorage.create(film);
+        filmDbStorage.delete(film.getId());
+
+        final NotFoundException exception = assertThrows(
+                NotFoundException.class,
+                () -> filmDbStorage.getEntityById(film.getId())
+        );
     }
 
     @Test
@@ -191,4 +236,37 @@ public class FilmDbStorageTest {
         assertThat(commonFilms.get(0).getId()).isEqualTo(film.getId());
     }
 
+    void getRecommendations() {
+        film = filmDbStorage.create(film);
+        nextFilm = filmDbStorage.create(nextFilm);
+        lastFilm = filmDbStorage.create(lastFilm);
+        user = userDbStorage.create(user);
+        lastUser = userDbStorage.create(lastUser);
+
+        likeStorage.addLike(film.getId(), user.getId());
+        likeStorage.addLike(nextFilm.getId(), user.getId());
+        likeStorage.addLike(lastFilm.getId(), user.getId());
+        likeStorage.addLike(film.getId(), lastUser.getId());
+        likeStorage.addLike(nextFilm.getId(), lastUser.getId());
+        List<Film> recommends = filmDbStorage.getRecommendations(lastUser.getId());
+        assertEquals(recommends.size(), 1, "Не совпадает размер");
+        assertEquals(recommends.get(0).getName(), lastFilm.getName(), "Не совпадает название");
+    }
+
+    @Test
+    void shouldGetDirectorFilms() {
+        Director director1 = Director.builder().name("Новый режиссер").build();
+        Director director2 = Director.builder().name("Обновленный режиссер").build();
+        director1 = directorDbStorage.create(director1);
+        director2 = directorDbStorage.create(director2);
+
+        film.setDirectors(Set.of(director1));
+        filmDbStorage.create(film);
+        updatedFilm.setDirectors(Set.of(director2, director1));
+        filmDbStorage.create(updatedFilm);
+
+        assertThat(filmDbStorage.getDirectorFilms(director1.getId())).isNotNull()
+                .usingRecursiveComparison()
+                .isEqualTo(List.of(film, updatedFilm));
+    }
 }
