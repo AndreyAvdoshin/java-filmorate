@@ -3,9 +3,9 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FriendDbStorage;
-import ru.yandex.practicum.filmorate.storage.Storage;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.List;
 
@@ -14,10 +14,12 @@ import java.util.List;
 public class UserService extends BaseService<User> {
 
     private final FriendDbStorage friendDbStorage;
+    private final FilmDbStorage filmDbStorage;
 
-    public UserService(Storage<User> storage, FriendDbStorage friendDbStorage) {
+    public UserService(Storage<User> storage, FriendDbStorage friendDbStorage, FilmDbStorage filmDbStorage) {
         super(storage);
         this.friendDbStorage = friendDbStorage;
+        this.filmDbStorage = filmDbStorage;
     }
 
     public void createFriendship(int firstUserId, int secondUserId) {
@@ -50,5 +52,9 @@ public class UserService extends BaseService<User> {
     public void checkUsers(int firstUserId, int secondUserId) {
         getEntity(firstUserId);
         getEntity(secondUserId);
+    }
+
+    public List<Film> getRecommendations(int id) {
+        return filmDbStorage.getRecommendations(id);
     }
 }

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @JdbcTest
@@ -32,8 +33,11 @@ public class FilmDbStorageTest {
     private final DirectorDbStorage directorDbStorage;
 
     Film film;
+    Film nextFilm;
+    Film lastFilm;
     Film updatedFilm;
     User user;
+    User lastUser;
 
     @BeforeEach
     void setUp() {
@@ -46,6 +50,26 @@ public class FilmDbStorageTest {
                 .likes(new HashSet<>())
                 .genres(new HashSet<>())
                 .directors(new HashSet<>())
+                .build();
+
+        nextFilm = Film.builder()
+                .name("Второй фильм")
+                .description("Описание второго")
+                .releaseDate(LocalDate.of(2010, 1, 1))
+                .duration(100)
+                .mpa(mpaDBStorage.getEntityById(1))
+                .likes(new HashSet<>())
+                .genres(new HashSet<>())
+                .build();
+
+        lastFilm = Film.builder()
+                .name("Третий фильм")
+                .description("Описание третьего")
+                .releaseDate(LocalDate.of(2020, 1, 1))
+                .duration(100)
+                .mpa(mpaDBStorage.getEntityById(1))
+                .likes(new HashSet<>())
+                .genres(new HashSet<>())
                 .build();
 
         updatedFilm = Film.builder()
@@ -64,6 +88,13 @@ public class FilmDbStorageTest {
                 .login("login")
                 .name("")
                 .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        lastUser = User.builder()
+                .email("bbb@bbb.ccc")
+                .login("loginLast")
+                .name("Name")
+                .birthday(LocalDate.of(2010, 1, 1))
                 .build();
     }
 
@@ -180,6 +211,22 @@ public class FilmDbStorageTest {
     }
 
     @Test
+    void getRecommendations() {
+        film = filmDbStorage.create(film);
+        nextFilm = filmDbStorage.create(nextFilm);
+        lastFilm = filmDbStorage.create(lastFilm);
+        user = userDbStorage.create(user);
+        lastUser = userDbStorage.create(lastUser);
+
+        likeStorage.addLike(film.getId(),user.getId());
+        likeStorage.addLike(nextFilm.getId(),user.getId());
+        likeStorage.addLike(lastFilm.getId(),user.getId());
+        likeStorage.addLike(film.getId(),lastUser.getId());
+        likeStorage.addLike(nextFilm.getId(),lastUser.getId());
+        List<Film> recommends = filmDbStorage.getRecommendations(lastUser.getId());
+        assertEquals(recommends.size(),1, "Не совпадает размер");
+        assertEquals(recommends.get(0).getName(), lastFilm.getName(), "Не совпадает название");
+
     void shouldGetDirectorFilms() {
         Director director1 = Director.builder().name("Новый режиссер").build();
         Director director2 = Director.builder().name("Обновленный режиссер").build();

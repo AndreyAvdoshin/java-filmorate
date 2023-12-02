@@ -164,6 +164,23 @@ public class FilmDbStorage implements Storage<Film> {
         }
     }
 
+    public List<Film> getRecommendations(int userId) {
+        String sql = "SELECT f.*, MPA.ID, mpa.NAME " +
+                     "FROM likes l JOIN films f on f.id = l.film_id " + "JOIN mpa on mpa.id = f.mpa_id " +
+                     "WHERE l.user_id = (SELECT l2.user_id " +
+                                         "FROM likes l1 join likes l2 ON l1.film_id = l2.film_id " +
+                                         "AND l1.user_id != l2.user_id " +
+                                         "WHERE l1.user_id = ? " +
+                                         "GROUP BY l1.user_id, l2.user_id " +
+                                         "ORDER BY COUNT(*) DESC limit 1) " +
+                     "AND l.film_id NOT IN (SELECT film_id " +
+                                            "FROM likes " +
+                                            "WHERE user_id = ?)";
+
+        return jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, likeDbStorage),
+                userId, userId);
+    }
+  
     public List<Film> getDirectorFilms(int directorId) {
         log.info("Запрос всех фильмов режиссера - {}", directorId);
         String sql = "SELECT films.*, mpa.* " +
@@ -174,5 +191,4 @@ public class FilmDbStorage implements Storage<Film> {
                 "ORDER BY films.release_date ASC";
         return jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, likeDbStorage, directorDbStorage), directorId);
     }
-
 }
