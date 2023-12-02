@@ -177,7 +177,7 @@ public class FilmDbStorage implements Storage<Film> {
                                             "FROM likes " +
                                             "WHERE user_id = ?)";
 
-        return jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, likeDbStorage),
+        return jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, likeDbStorage, directorDbStorage),
                 userId, userId);
     }
   
