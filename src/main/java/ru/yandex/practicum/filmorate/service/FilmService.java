@@ -18,11 +18,11 @@ public class FilmService extends BaseService<Film> {
     LikeDbStorage likeDbStorage;
     FilmDbStorage filmDbStorage;
 
-    public FilmService(Storage<Film> storage, Storage<User> userStorage, LikeDbStorage likeDbStorage) {
+    public FilmService(FilmDbStorage storage, Storage<User> userStorage, LikeDbStorage likeDbStorage) {
         super(storage);
         this.userStorage = userStorage;
         this.likeDbStorage = likeDbStorage;
-        this.filmDbStorage = (FilmDbStorage) storage;
+        this.filmDbStorage = storage;
     }
 
     public void addLike(int filmId, int userId) {
