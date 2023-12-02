@@ -148,6 +148,22 @@ class FilmControllerTest {
     }
 
     @Test
+    void shouldGet200WhenDeleteFilm() throws Exception {
+        filmController.create(film);
+
+        mockMvc.perform(delete("/films/1"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldGet404WhenDeleteIncorrectId() throws Exception {
+        filmController.create(film);
+
+        mockMvc.perform(delete("/films/9999"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void shouldGet400WhenNameIsNull() throws Exception {
         film = Film.builder()
                 .name("")
