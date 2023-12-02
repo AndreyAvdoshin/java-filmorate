@@ -105,4 +105,16 @@ public class FilmDbStorage implements Storage<Film> {
         }
     }
 
+    public List<Film> getCommonFilms(int id, int friendId) {
+        String sql = "SELECT f.*, mpa.* FROM likes l " +
+                "JOIN films f ON f.id = l.film_id " +
+                "JOIN mpa ON mpa.id = f.mpa_id " +
+                "WHERE l.film_id IN (SELECT l.film_id FROM likes l WHERE l.user_id IN (?, ?) " +
+                "GROUP BY l.film_id HAVING COUNT(l.film_id) > 1) " +
+                "AND l.user_id = ? " +
+                "ORDER BY (SELECT COUNT(*) FROM likes WHERE film_id = l.film_id) DESC";
+        log.info("Запрос общих фильмов пользователей - {}, {}", id, friendId);
+        return jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, likeDbStorage), id, friendId, id);
+    }
+
 }

@@ -33,6 +33,7 @@ public class FilmDbStorageTest {
     Film film;
     Film updatedFilm;
     User user;
+    User friendUser;
 
     @BeforeEach
     void setUp() {
@@ -61,6 +62,14 @@ public class FilmDbStorageTest {
                 .login("login")
                 .name("")
                 .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        friendUser = User.builder()
+                .email("friend@friend.nan")
+                .login("friend")
+                .name("friendUser")
+                .birthday(LocalDate.of(1999, 1, 1))
+                .friends(new HashSet<>())
                 .build();
     }
 
@@ -163,6 +172,23 @@ public class FilmDbStorageTest {
         assertThat(film).isNotNull()
                 .usingRecursiveComparison()
                 .isEqualTo(updatedFilm);
+    }
+
+    @Test
+    void shouldGetCommonFilms() {
+        user = userDbStorage.create(user);
+        friendUser = userDbStorage.create(friendUser);
+
+        film = filmDbStorage.create(film);
+
+        likeStorage.addLike(film.getId(), user.getId());
+        likeStorage.addLike(film.getId(), friendUser.getId());
+
+        List<Film> commonFilms = filmDbStorage.getCommonFilms(user.getId(), friendUser.getId());
+
+        assertThat(commonFilms).isNotNull();
+        assertThat(commonFilms.get(0).getName()).isEqualTo("Новый фильм");
+        assertThat(commonFilms.get(0).getId()).isEqualTo(film.getId());
     }
 
 }
