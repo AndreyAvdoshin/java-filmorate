@@ -55,7 +55,6 @@ public class FilmDbStorage implements Storage<Film> {
         for (Genre genre : film.getGenres()) {
             jdbcTemplate.update(sql, key.intValue(), genre.getId());
         }
-
         film.setGenres(genreDBStorage.getAllGenresByFilmId(film.getId()));
         log.info("Сохранен фильм: {}", film);
         return film;
