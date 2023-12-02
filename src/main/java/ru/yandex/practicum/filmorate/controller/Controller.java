@@ -41,4 +41,9 @@ public abstract class Controller<T extends Entity> {
         return service.update(entity);
     }
 
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable int id) {
+        service.delete(id);
+    }
+
 }

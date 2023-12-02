@@ -33,12 +33,12 @@ public class UserService extends BaseService<User> {
     }
 
     public List<User> getFriends(int id) {
+        getEntity(id);
         return friendDbStorage.getFriends(id);
     }
 
     public List<User> getCommonFriends(int id, int otherId) {
         checkUsers(id, otherId);
-
         return friendDbStorage.getCommonFriends(id, otherId);
     }
 
