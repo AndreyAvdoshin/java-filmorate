@@ -60,7 +60,7 @@ public class FilmController extends Controller<Film> {
         }
         return service.getCommonFilms(userId, friendId);
     }
-  
+
     @GetMapping("/director/{directorId}")
     public List<Film> getDirectorFilms(@PathVariable(name = "directorId") int directorId,
                                     @RequestParam(name = "sortBy",
