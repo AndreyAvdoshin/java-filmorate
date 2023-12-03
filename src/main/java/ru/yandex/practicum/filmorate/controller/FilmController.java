@@ -7,9 +7,11 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static ru.yandex.practicum.filmorate.Constants.FILM_SORT_FIELDS;
+import static ru.yandex.practicum.filmorate.Constants.QUERY_CATEGORY_FIELDS;
 
 
 @Slf4j
@@ -73,5 +75,19 @@ public class FilmController extends Controller<Film> {
             throw new IncorrectParameterException(sortField);
         }
         return service.getDirectorFilmsBySortField(directorId, sortField);
+    }
+
+    @GetMapping("/search")
+    public List<Film> getFilmsByQueryField(@RequestParam(name = "query") String queryField,
+                                           @RequestParam(name = "by",
+                                                   defaultValue = "director,title") String queryCategoryStr) {
+        List<String> queryCategories = List.of(queryCategoryStr.split(","));
+        List<String> unknownCategories = new ArrayList<>(queryCategories);
+        unknownCategories.removeAll(QUERY_CATEGORY_FIELDS);
+
+        if (!unknownCategories.isEmpty()) {
+            throw new IncorrectParameterException(unknownCategories.toString());
+        }
+        return service.getFilmsByQueryFieldAndCategories(queryField, queryCategories);
     }
 }

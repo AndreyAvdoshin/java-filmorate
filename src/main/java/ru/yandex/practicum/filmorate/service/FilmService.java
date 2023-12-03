@@ -66,4 +66,8 @@ public class FilmService extends BaseService<Film> {
         return filmDbStorage.getCommonFilms(id, friendId);
     }
 
+    public List<Film> getFilmsByQueryFieldAndCategories(String queryField, List<String> queryCategories) {
+        return filmDbStorage.getFilmsByQueryFieldAndCategories(queryField, queryCategories);
+    }
+
 }
