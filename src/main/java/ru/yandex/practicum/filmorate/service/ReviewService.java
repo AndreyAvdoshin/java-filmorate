@@ -23,10 +23,6 @@ public class ReviewService extends BaseService<Review> {
         this.filmStorage = filmStorage;
     }
 
-    public List<Review> getAllReview(int count) {
-        return storage.getAllReviewLimitCount(count);
-    }
-
     @Override
     public Review create(Review review) {
         userStorage.getEntityById(review.getUserId());
@@ -41,32 +37,26 @@ public class ReviewService extends BaseService<Review> {
         return storage.update(review);
     }
 
-    public List<Review> getReviewByFilmId(int id, int count) {
-        filmStorage.getEntityById(id);
-        return storage.getReviewByFilmId(id, count);
+    public List<Review> getReviewsWithQueryParams(int count) {
+        return storage.getReviewsWithQueryParams(count);
     }
 
-    public void addLike(int id, int userId) {
-        check(id, userId);
-        storage.addLike(id, userId);
+    public List<Review> getReviewsWithQueryParams(int filmId, int count) {
+        filmStorage.getEntityById(filmId);
+        return storage.getReviewsWithQueryParams(filmId, count);
     }
 
-    public void addDislike(int id, int userId) {
-        check(id, userId);
-        storage.addDislike(id, userId);
+    public void addReaction(int id, int userId, boolean isLike) {
+        checkReviewAndUser(id, userId);
+        storage.addReaction(id, userId, isLike);
     }
 
-    public void deleteLike(int id, int userId) {
-        check(id, userId);
-        storage.deleteLike(id, userId);
+    public void deleteReaction(int id, int userId, boolean isLike) {
+        checkReviewAndUser(id, userId);
+        storage.deleteReaction(id, userId, isLike);
     }
 
-    public void deleteDislike(int id, int userId) {
-        check(id, userId);
-        storage.deleteDislike(id, userId);
-    }
-
-    private void check(int id, int userId) {
+    private void checkReviewAndUser(int id, int userId) {
         storage.getEntityById(id);
         userStorage.getEntityById(userId);
     }

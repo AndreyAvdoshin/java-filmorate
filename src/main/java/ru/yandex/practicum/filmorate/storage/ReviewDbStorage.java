@@ -34,17 +34,6 @@ public class ReviewDbStorage implements Storage<Review> {
         return jdbcTemplate.query(sql, new ReviewMapper());
     }
 
-    public List<Review> getAllReviewLimitCount(int count) {
-        log.info("Запрос всех отзывов с лимитом - {}", count);
-        String sql = "SELECT r.*, " +
-                "COUNT(*) FILTER (WHERE rl.is_like = true) - COUNT(*) FILTER (WHERE rl.is_like = false) AS useful " +
-                "FROM reviews r " +
-                "LEFT JOIN review_likes rl ON r.ID = rl.REVIEW_ID " +
-                "GROUP BY r.ID, r.content, r.is_positive, r.user_id, r.film_id " +
-                "ORDER BY useful DESC LIMIT ?";
-        return jdbcTemplate.query(sql, new ReviewMapper(), count);
-    }
-
     @Override
     public Review create(Review review) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
@@ -69,6 +58,16 @@ public class ReviewDbStorage implements Storage<Review> {
     }
 
     @Override
+    public void delete(int id) {
+        String sql = "DELETE FROM reviews WHERE id = ?";
+        int count = jdbcTemplate.update(sql, id);
+        if (count == 0) {
+            throw new NotFoundException("Отзыв по id " + id + " не найден");
+        }
+        log.info("Удален отзыв по id - {}", id);
+    }
+
+    @Override
     public Review getEntityById(int id) {
         log.info("Запрос отзыва по id - {}", id);
         String sql = "SELECT r.*, " +
@@ -84,57 +83,46 @@ public class ReviewDbStorage implements Storage<Review> {
         }
     }
 
-    @Override
-    public void delete(int id) {
-        String sql = "DELETE FROM reviews WHERE id = ?";
-        int count = jdbcTemplate.update(sql, id);
-        if (count == 0) {
-            throw new NotFoundException("Отзыв по id " + id + " не найден");
-        }
-        log.info("Удален отзыв по id - {}", id);
+    public List<Review> getReviewsWithQueryParams(int count) {
+        log.info("Запрос всех отзывов с лимитом - {}", count);
+        String sql = "SELECT r.*, " +
+                "COUNT(*) FILTER (WHERE rl.is_like = true) - COUNT(*) FILTER (WHERE rl.is_like = false) AS useful " +
+                "FROM reviews r " +
+                "LEFT JOIN review_likes rl ON r.ID = rl.REVIEW_ID " +
+                "GROUP BY r.ID, r.content, r.is_positive, r.user_id, r.film_id " +
+                "ORDER BY useful DESC, id ASC " +
+                "LIMIT ?";
+        return jdbcTemplate.query(sql, new ReviewMapper(), count);
     }
 
-    public List<Review> getReviewByFilmId(int id, int count) {
-        log.info("Запрос отзывов по фильму");
+    public List<Review> getReviewsWithQueryParams(int filmId, int count) {
+        log.info("Запрос отзывов по фильму - {} с лимитом - {}", filmId, count);
         String sql = "SELECT r.*, " +
                 "COUNT(*) FILTER (WHERE rl.is_like = true) - COUNT(*) FILTER (WHERE rl.is_like = false) AS useful " +
                 "FROM reviews r " +
                 "LEFT JOIN review_likes rl ON r.ID = rl.REVIEW_ID " +
                 "WHERE film_id = ? " +
                 "GROUP BY r.ID, r.content, r.is_positive, r.user_id, r.film_id " +
-                "ORDER BY useful DESC LIMIT ?";
-        return jdbcTemplate.query(sql, new ReviewMapper(), id, count);
+                "ORDER BY useful DESC, id ASC " +
+                "LIMIT ?";
+        return jdbcTemplate.query(sql, new ReviewMapper(), filmId, count);
     }
 
-    public void addLike(int id, int userId) {
-        log.info("Пользователь - {} добавляет лайк отзыву -  {}", userId, id);
+    public void addReaction(int id, int userId, boolean isLike) {
+        log.info("Пользователь - {} добавляет реакцию - {} на отзыв - {}", userId, isLike ? "лайк" : "дизлайк", id);
         String sql = "INSERT INTO review_likes (user_id, review_id, is_like) VALUES (?, ?, ?)";
         try {
-            jdbcTemplate.update(sql, userId, id, true);
+            jdbcTemplate.update(sql, userId, id, isLike);
         } catch (DuplicateKeyException e) {
-            throw new UniqueViolatedException("Лайк от пользователя - " + userId + " уже поставлен отзыву - " + id);
+            throw new UniqueViolatedException(String.format(
+                    "Реакция - %s от пользователя - %d уже проставлена отзыву - %d",
+                    isLike ? "лайк" : "дизлайк", userId, id));
         }
     }
 
-    public void addDislike(int id, int userId) {
-        log.info("Пользователь - {} добавляет дизлайк отзыву -  {}", userId, id);
-        String sql = "INSERT INTO review_likes (user_id, review_id, is_like) VALUES (?, ?, ?)";
-        try {
-            jdbcTemplate.update(sql, userId, id, false);
-        } catch (DuplicateKeyException e) {
-            throw new UniqueViolatedException("Дизайк от пользователя - " + userId + " уже поставлен отзыву - " + id);
-        }
-    }
-
-    public void deleteLike(int id, int userId) {
-        log.info("Пользователь - {} удаляет лайк отзыву -  {}", userId, id);
+    public void deleteReaction(int id, int userId, boolean isLike) {
+        log.info("Пользователь - {} удаляет реакцию - {} на отзыв - {}", userId, isLike ? "лайк" : "дизлайк", id);
         jdbcTemplate.update("DELETE review_likes WHERE user_id = ? AND review_id = ? AND is_like = ?",
-                userId, id, true);
-    }
-
-    public void deleteDislike(int id, int userId) {
-        log.info("Пользователь - {} удаляет дизлайк отзыву -  {}", userId, id);
-        jdbcTemplate.update("DELETE review_likes WHERE user_id = ? AND review_id = ? AND is_like = ?",
-                userId, id, false);
+                userId, id, isLike);
     }
 }
