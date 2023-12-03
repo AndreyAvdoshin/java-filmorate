@@ -3,17 +3,17 @@ package ru.yandex.practicum.filmorate.controller;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.service.ReviewsService;
+import ru.yandex.practicum.filmorate.service.ReviewService;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/reviews")
-public class ReviewsController extends Controller<Review> {
+public class ReviewController extends Controller<Review> {
 
-    private final ReviewsService service;
+    private final ReviewService service;
 
-    public ReviewsController(ReviewsService service) {
+    public ReviewController(ReviewService service) {
         super(service);
         this.service = service;
     }
@@ -23,22 +23,6 @@ public class ReviewsController extends Controller<Review> {
     public List<Review> get() {
         return service.get();
     }
-
-//    @PostMapping
-//    public Review create(@Valid @RequestBody @NonNull Review entity) {
-//        return service.create(entity);
-//    }
-
-//    @PutMapping
-//    public Review update(@Valid @RequestBody @NonNull Review entity) {
-//        return service.update(entity);
-//    }
-//
-//    @DeleteMapping("/{id}")
-//    public void delete(@PathVariable int id) {
-//        service.delete(id);
-//    }
-//
 
     @GetMapping
     public List<Review> getReviewByFilmId(@RequestParam(required = false) Integer filmId, @RequestParam(defaultValue = "10") int count) {

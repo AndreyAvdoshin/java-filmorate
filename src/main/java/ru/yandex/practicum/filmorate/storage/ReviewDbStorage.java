@@ -15,11 +15,11 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class ReviewsDbStorage implements Storage<Review> {
+public class ReviewDbStorage implements Storage<Review> {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public ReviewsDbStorage(JdbcTemplate jdbcTemplate) {
+    public ReviewDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -35,7 +35,7 @@ public class ReviewsDbStorage implements Storage<Review> {
     }
 
     public List<Review> getAllReviewLimitCount(int count) {
-        log.info("Запрос на все отзывы");
+        log.info("Запрос всех отзывов с лимитом - {}", count);
         String sql = "SELECT r.*, " +
                 "COUNT(*) FILTER (WHERE rl.is_like = true) - COUNT(*) FILTER (WHERE rl.is_like = false) AS useful " +
                 "FROM reviews r " +
@@ -84,6 +84,7 @@ public class ReviewsDbStorage implements Storage<Review> {
         }
     }
 
+    @Override
     public void delete(int id) {
         String sql = "DELETE FROM reviews WHERE id = ?";
         int count = jdbcTemplate.update(sql, id);

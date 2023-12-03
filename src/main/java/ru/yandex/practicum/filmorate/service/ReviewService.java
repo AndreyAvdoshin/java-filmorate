@@ -4,19 +4,19 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.ReviewsDbStorage;
+import ru.yandex.practicum.filmorate.storage.ReviewDbStorage;
 import ru.yandex.practicum.filmorate.storage.Storage;
 
 import java.util.List;
 
 @Service
-public class ReviewsService extends BaseService<Review> {
+public class ReviewService extends BaseService<Review> {
 
-    ReviewsDbStorage storage;
+    ReviewDbStorage storage;
     Storage<User> userStorage;
     Storage<Film> filmStorage;
 
-    public ReviewsService(ReviewsDbStorage storage, Storage<User> userStorage, Storage<Film> filmStorage) {
+    public ReviewService(ReviewDbStorage storage, Storage<User> userStorage, Storage<Film> filmStorage) {
         super(storage);
         this.storage = storage;
         this.userStorage = userStorage;
@@ -39,10 +39,6 @@ public class ReviewsService extends BaseService<Review> {
         userStorage.getEntityById(review.getUserId());
         filmStorage.getEntityById(review.getFilmId());
         return storage.update(review);
-    }
-
-    public Review getEntityById(int id) {
-        return storage.getEntityById(id);
     }
 
     public List<Review> getReviewByFilmId(int id, int count) {
