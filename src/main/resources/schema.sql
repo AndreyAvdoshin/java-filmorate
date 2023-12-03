@@ -8,7 +8,7 @@ DROP TABLE genres IF EXISTS CASCADE;
 DROP TABLE users IF EXISTS CASCADE;
 DROP TABLE directors IF EXISTS CASCADE;
 DROP TABLE film_director IF EXISTS CASCADE;
-
+DROP TABLE review_like IF EXISTS CASCADE;
 
 
 CREATE TABLE IF NOT EXISTS users (
@@ -84,4 +84,10 @@ CREATE TABLE IF NOT EXISTS reviews (
     film_id BIGINT NOT NULL REFERENCES films (id),
     useful INTEGER DEFAULT 0,
     CONSTRAINT unique_user_reviews UNIQUE (user_id, film_id)
+);
+
+CREATE TABLE IF NOT EXISTS review_like (
+    user_id BIGINT REFERENCES users (id) ON DELETE CASCADE,
+	review_id BIGINT REFERENCES reviews (id) ON DELETE CASCADE,
+	PRIMARY KEY (user_id, review_id)
 );

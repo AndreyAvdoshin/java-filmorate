@@ -6,101 +6,64 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.ReviewsDbStorage;
 import ru.yandex.practicum.filmorate.storage.ReviewsStorage;
 import ru.yandex.practicum.filmorate.storage.Storage;
 
 import java.util.List;
 
 @Service
-public class ReviewsService implements ReviewsStorage {
+public class ReviewsService extends BaseService<Review> {
 
-    ReviewsStorage storageReviews;
+    ReviewsDbStorage storage;
     Storage<User> userStorage;
     Storage<Film> filmStorage;
 
-
-    @Autowired
-    public ReviewsService(ReviewsStorage storageReviews, Storage<User> userStorage, Storage<Film> filmStorage) {
-        this.storageReviews = storageReviews;
+    public ReviewsService(ReviewsDbStorage storage, Storage<User> userStorage, Storage<Film> filmStorage) {
+        super(storage);
+        this.storage = storage;
         this.userStorage = userStorage;
         this.filmStorage = filmStorage;
     }
 
-    @Override
     public List<Review> getAllReview(int count) {
-        return storageReviews.getAllReview(count);
+        return storage.getAllReviewLimitCount(count);
     }
 
-    public Review create(Review entity) {
-        User user = userStorage.getEntityById(entity.getUserId());
-        Film film = filmStorage.getEntityById(entity.getFilmId());
-        if (user != null && film != null) {
-            return storageReviews.create(entity);
-        }
-        throw new NotFoundException("id не найден");
+    public Review create(Review review) {
+        userStorage.getEntityById(review.getUserId());
+        filmStorage.getEntityById(review.getFilmId());
+        return storage.create(review);
     }
 
-    public Review update(Review entity) {
-        User user = userStorage.getEntityById(entity.getUserId());
-        Film film = filmStorage.getEntityById(entity.getFilmId());
-        if (user != null && film != null) {
-            return storageReviews.update(entity);
-        }
-        throw new NotFoundException("id не найден");
+    public Review update(Review review) {
+        userStorage.getEntityById(review.getUserId());
+        filmStorage.getEntityById(review.getFilmId());
+        return storage.update(review);
     }
 
     public Review getEntityById(int id) {
-        if (storageReviews.getEntityById(id) != null) {
-            return storageReviews.getEntityById(id);
-        }
-        throw new NotFoundException("id не найден");
-    }
-
-    public void delete(int id) {
-        if (storageReviews.getEntityById(id) != null) {
-            storageReviews.delete(id);
-        } else {
-            throw new NotFoundException("id не найден");
-        }
+        return storage.getEntityById(id);
     }
 
     public List<Review> getReviewByFilmId(int id, int count) {
-        Film film = filmStorage.getEntityById(id);
-        if (film != null) {
-            return storageReviews.getReviewByFilmId(id, count);
-        }
-        throw new NotFoundException("id не найден");
+        filmStorage.getEntityById(id);
+        return storage.getReviewByFilmId(id, count);
     }
 
     public void addLike(int id) {
-        if (storageReviews.getEntityById(id) != null) {
-            storageReviews.addLike(id);
-        } else {
-            throw new NotFoundException("id не найден");
-        }
+        storage.addLike(id);
     }
 
     public void addDislike(int id) {
-        if (storageReviews.getEntityById(id) != null) {
-            storageReviews.addDislike(id);
-        } else {
-            throw new NotFoundException("id не найден");
-        }
+        storage.addDislike(id);
     }
 
     public void deleteLike(int id) {
-        if (storageReviews.getEntityById(id) != null) {
-            storageReviews.deleteLike(id);
-        } else {
-            throw new NotFoundException("id не найден");
-        }
+        storage.deleteLike(id);
     }
 
     public void deleteDislike(int id) {
-        if (storageReviews.getEntityById(id) != null) {
-            storageReviews.deleteDislike(id);
-        } else {
-            throw new NotFoundException("id не найден");
-        }
+        storage.deleteDislike(id);
     }
 }
