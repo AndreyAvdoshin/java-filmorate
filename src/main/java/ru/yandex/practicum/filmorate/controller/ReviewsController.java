@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewsService;
 
@@ -48,23 +49,43 @@ public class ReviewsController extends Controller<Review> {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void addLike(@PathVariable int id) {
-        service.addLike(id);
+    public void addLike(@PathVariable int id, @PathVariable int userId) {
+        if (id <= 0) {
+            throw new IncorrectParameterException("id");
+        } else if (userId <= 0) {
+            throw new IncorrectParameterException("userId");
+        }
+        service.addLike(id, userId);
     }
 
     @PutMapping("/{id}/dislike/{userId}")
-    void addDislike(@PathVariable int id) {
-        service.addDislike(id);
+    void addDislike(@PathVariable int id, @PathVariable int userId) {
+        if (id <= 0) {
+            throw new IncorrectParameterException("id");
+        } else if (userId <= 0) {
+            throw new IncorrectParameterException("userId");
+        }
+        service.addDislike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    void deleteLike(@PathVariable int id) {
-        service.deleteLike(id);
+    void deleteLike(@PathVariable int id, @PathVariable int userId) {
+        if (id <= 0) {
+            throw new IncorrectParameterException("id");
+        } else if (userId <= 0) {
+            throw new IncorrectParameterException("userId");
+        }
+        service.deleteLike(id, userId);
     }
 
     @DeleteMapping("/{id}/dislike/{userId}")
-    void deleteDislike(@PathVariable int id) {
-        service.deleteDislike(id);
+    void deleteDislike(@PathVariable int id, @PathVariable int userId) {
+        if (id <= 0) {
+            throw new IncorrectParameterException("id");
+        } else if (userId <= 0) {
+            throw new IncorrectParameterException("userId");
+        }
+        service.deleteDislike(id, userId);
     }
 
 }
