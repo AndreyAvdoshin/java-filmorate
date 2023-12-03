@@ -249,7 +249,8 @@ class ReviewDbStorageTest {
     }
 
     @Test
-    void shouldDeleteReactionLike() {userDbStorage.create(user1);
+    void shouldDeleteReactionLike() {
+        userDbStorage.create(user1);
         userDbStorage.create(user2);
         filmDbStorage.create(film1);
         filmDbStorage.create(film2);
