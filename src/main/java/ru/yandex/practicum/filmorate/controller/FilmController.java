@@ -11,7 +11,6 @@ import java.util.List;
 
 import static ru.yandex.practicum.filmorate.Constants.FILM_SORT_FIELDS;
 
-
 @Slf4j
 @RestController
 @RequestMapping("/films")
@@ -44,11 +43,13 @@ public class FilmController extends Controller<Film> {
     }
 
     @GetMapping("/popular")
-    public List<Film> getRatedFilms(@RequestParam(defaultValue = "10") Integer count) {
+    public List<Film> getRatedFilms(@RequestParam(defaultValue = "10", required = false)  Integer count,
+                                    @RequestParam(defaultValue = "999",required = false)  Integer genreId,
+                                    @RequestParam(defaultValue = "999",required = false)  Integer year) {
         if (count <= 0) {
             throw new IncorrectParameterException("count");
         }
-        return service.getRatedFilms(count);
+        return service.getRatedFilms(count, genreId, year);
     }
 
     @GetMapping("/director/{directorId}")
