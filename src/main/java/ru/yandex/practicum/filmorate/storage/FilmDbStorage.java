@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementSetter;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -15,7 +17,9 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -204,5 +208,28 @@ public class FilmDbStorage implements Storage<Film> {
                 "WHERE fd.director_id = ?" +
                 "ORDER BY films.release_date ASC";
         return jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, likeDbStorage, directorDbStorage), directorId);
+    }
+
+    public List<Film> getFilmsByQueryFieldAndCategories(String queryField, List<String> queryCategories) {
+        log.info("Запрос фильмов по подстроке - {} и категориям - {}", queryField, queryCategories);
+        Map<String, Object> params = new HashMap<>();
+        if (queryCategories.contains("title")) {
+            params.put("title", "%" + queryField + "%");
+        }
+        if (queryCategories.contains("director")) {
+            params.put("director", "%" + queryField + "%");
+        }
+
+        String sql = "SELECT films.*, mpa.* " +
+                "FROM film_director fd " +
+                (params.containsKey("title") ? "LEFT JOIN films ON fd.film_id = films.id " : " ") +
+                (params.containsKey("director") ? "LEFT JOIN directors ON fd.director_id = directors.id " : " ") +
+                "INNER JOIN mpa ON films.mpa_id = mpa.id " +
+                "WHERE " +
+                (params.containsKey("title") ? "films.name LIKE :title " : "") +
+                "OR " + (params.containsKey("director") ? "directors.name LIKE :director " : "") +
+                "ORDER BY films.release_date ASC";
+        log.info("Запрос фильмов по подстроке - {}", sql);
+        return jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, likeDbStorage, directorDbStorage), params);
     }
 }

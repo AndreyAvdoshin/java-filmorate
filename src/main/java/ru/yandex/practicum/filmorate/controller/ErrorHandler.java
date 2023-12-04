@@ -20,7 +20,7 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler(UniqueViolatedException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ErrorResponse uniqueViolationException(final RuntimeException e) {
         return new ErrorResponse("error", e.getMessage());
     }
