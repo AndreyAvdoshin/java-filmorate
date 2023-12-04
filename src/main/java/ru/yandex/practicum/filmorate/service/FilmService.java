@@ -66,9 +66,7 @@ public class FilmService extends BaseService<Film> {
     }
 
     public List<Film> getFilmsByQueryFieldAndCategories(String queryField, List<String> queryCategories) {
-        log.info("Запрос фильмов по подстроке - {} и категориям - {}", queryField, queryCategories);
-        String queryFieldInLowerCase = queryField.toLowerCase();
-        return filmDbStorage.getFilmsByQueryFieldAndCategories(queryFieldInLowerCase, queryCategories).stream()
+        return filmDbStorage.getFilmsByQueryFieldAndCategories(queryField, queryCategories).stream()
                 .sorted(Comparator.comparingInt(Film::getLikesCount).reversed().thenComparing(Film::getId))
                 .collect(Collectors.toList());
     }
