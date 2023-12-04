@@ -205,9 +205,4 @@ public class FilmDbStorage implements Storage<Film> {
                 "ORDER BY films.release_date ASC";
         return jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, likeDbStorage, directorDbStorage), directorId);
     }
-
-    public List<Film> getFilmsByQueryFieldAndCategories(String queryField, List<String> queryCategories) {
-        log.info("Запрос фильмов по подстроке - {} и категориям - {}", queryField, queryCategories);
-        return null;
-    }
 }
