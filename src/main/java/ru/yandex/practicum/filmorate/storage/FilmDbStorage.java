@@ -233,13 +233,13 @@ public class FilmDbStorage implements Storage<Film> {
     public List<Film> getRatedFilms(Integer count, Integer genreId, Integer releaseYear) {
         List<Film> films;
         log.info("Запрос фильмов по рейтингу");
-        if (genreId != 999 || releaseYear != 999) {
-            if (genreId != 999 && releaseYear != 999) {
+        if (genreId != null || releaseYear != null) {
+            if (genreId != null && releaseYear != null) {
                 films = jdbcTemplate.query(getPopularGenreAndYear, new FilmMapper(
                         genreDBStorage,
                         likeDbStorage,
                         directorDbStorage), genreId, releaseYear, count);
-            } else if (genreId != 999) {
+            } else if (genreId != null) {
                     films = jdbcTemplate.query(getPopularGenre, new FilmMapper(
                             genreDBStorage,
                             likeDbStorage,

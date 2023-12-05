@@ -56,7 +56,7 @@ public class FilmService extends BaseService<Film> {
         return directorFilms;
     }
 
-    public List<Film> getRatedFilms(int count, int genreId, int releaseYear) {
+    public List<Film> getRatedFilms(Integer count, Integer genreId, Integer releaseYear) {
         return filmDbStorage.getRatedFilms(count, genreId, releaseYear);
     }
 
