@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -16,6 +17,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -202,7 +204,21 @@ public class FilmDbStorage implements Storage<Film> {
         }
     }
 
+    public List<Film> getCommonFilms(int id, int friendId) {
+        String sql = "SELECT f.*, mpa.* FROM likes l " +
+                "JOIN films f ON f.id = l.film_id " +
+                "JOIN mpa ON mpa.id = f.mpa_id " +
+                "WHERE l.film_id IN (SELECT l.film_id FROM likes l WHERE l.user_id IN (?, ?) " +
+                "GROUP BY l.film_id HAVING COUNT(l.film_id) > 1) " +
+                "AND l.user_id = ? " +
+                "ORDER BY (SELECT COUNT(*) FROM likes WHERE film_id = l.film_id) DESC";
+        log.info("Запрос общих фильмов пользователей - {}, {}", id, friendId);
+        return jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, likeDbStorage, directorDbStorage),
+                id, friendId, id);
+    }
+
     public List<Film> getRecommendations(int userId) {
+        log.info("Запрос рекомендационных фильмов для пользователя - {}", userId);
         String sql = "SELECT f.*, MPA.ID, mpa.NAME " +
                      "FROM likes l JOIN films f on f.id = l.film_id " + "JOIN mpa on mpa.id = f.mpa_id " +
                      "WHERE l.user_id = (SELECT l2.user_id " +
@@ -258,5 +274,24 @@ public class FilmDbStorage implements Storage<Film> {
                     directorDbStorage), count);
         }
         return films;
+    }
+  
+    public List<Film> getFilmsByQueryFieldAndCategories(String queryField, List<String> queryCategories) {
+        log.info("Запрос фильмов по подстроке - {} и категориям - {}", queryField, queryCategories);
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        boolean hasTitleCategory = queryCategories.contains("title");
+        boolean hasDirectorCategory = queryCategories.contains("director");
+
+        String sql = "SELECT DISTINCT films.*, mpa.* " +
+                "FROM film_director fd " +
+                "RIGHT JOIN films ON fd.film_id = films.id " +
+                (hasDirectorCategory ? "LEFT JOIN directors ON fd.director_id = directors.id " : "") +
+                "INNER JOIN mpa ON films.mpa_id = mpa.id " +
+                "WHERE " +
+                (hasTitleCategory ? "LOWER(films.name) LIKE :queryField " : "1<>1 ") +
+                "OR " + (hasDirectorCategory ? "LOWER(directors.name) LIKE :queryField " : "1<>1 ") +
+                "ORDER BY films.release_date ASC";
+        return namedParameterJdbcTemplate.query(sql, Map.of("queryField", "%" + queryField.toLowerCase() + "%"),
+                new FilmMapper(genreDBStorage, likeDbStorage, directorDbStorage));
     }
 }

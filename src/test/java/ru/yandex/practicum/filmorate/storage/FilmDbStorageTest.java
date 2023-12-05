@@ -37,6 +37,7 @@ public class FilmDbStorageTest {
     Film lastFilm;
     Film updatedFilm;
     User user;
+    User friendUser;
     User lastUser;
 
     @BeforeEach
@@ -90,6 +91,14 @@ public class FilmDbStorageTest {
                 .login("login")
                 .name("")
                 .birthday(LocalDate.of(2000, 1, 1))
+                .build();
+
+        friendUser = User.builder()
+                .email("friend@friend.nan")
+                .login("friend")
+                .name("friendUser")
+                .birthday(LocalDate.of(1999, 1, 1))
+                .friends(new HashSet<>())
                 .build();
 
         lastUser = User.builder()
@@ -212,7 +221,24 @@ public class FilmDbStorageTest {
     }
 
     @Test
-    void getRecommendations() {
+    void shouldGetCommonFilms() {
+        user = userDbStorage.create(user);
+        friendUser = userDbStorage.create(friendUser);
+
+        film = filmDbStorage.create(film);
+
+        likeStorage.addLike(film.getId(), user.getId());
+        likeStorage.addLike(film.getId(), friendUser.getId());
+
+        List<Film> commonFilms = filmDbStorage.getCommonFilms(user.getId(), friendUser.getId());
+
+        assertThat(commonFilms).isNotNull();
+        assertThat(commonFilms.get(0).getName()).isEqualTo("Новый фильм");
+        assertThat(commonFilms.get(0).getId()).isEqualTo(film.getId());
+    }
+
+    @Test
+    void shouldGetRecommendations() {
         film = filmDbStorage.create(film);
         nextFilm = filmDbStorage.create(nextFilm);
         lastFilm = filmDbStorage.create(lastFilm);
@@ -242,6 +268,24 @@ public class FilmDbStorageTest {
         filmDbStorage.create(updatedFilm);
 
         assertThat(filmDbStorage.getDirectorFilms(director1.getId())).isNotNull()
+                .usingRecursiveComparison()
+                .isEqualTo(List.of(film, updatedFilm));
+    }
+
+    @Test
+    void shouldGetFilmsByQueryFieldAndCategories() {
+        Director director1 = Director.builder().name("Новый режиссер").build();
+        Director director2 = Director.builder().name("Старый режиссер").build();
+        director1 = directorDbStorage.create(director1);
+        director2 = directorDbStorage.create(director2);
+
+        film.setDirectors(Set.of(director2));
+        filmDbStorage.create(film);
+        updatedFilm.setDirectors(Set.of(director1));
+        filmDbStorage.create(updatedFilm);
+
+        assertThat(filmDbStorage.getFilmsByQueryFieldAndCategories("нОвЫ", List.of("title", "director")))
+                .isNotNull()
                 .usingRecursiveComparison()
                 .isEqualTo(List.of(film, updatedFilm));
     }

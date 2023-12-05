@@ -15,5 +15,4 @@ public interface Storage<T extends Entity> {
     void delete(int id);
 
     T getEntityById(int id);
-
 }
