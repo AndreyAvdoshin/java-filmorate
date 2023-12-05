@@ -238,7 +238,8 @@ public class FilmDbStorageTest {
         assertThat(commonFilms.get(0).getId()).isEqualTo(film.getId());
     }
 
-    void getRecommendations() {
+    @Test
+    void shouldGetRecommendations() {
         film = filmDbStorage.create(film);
         nextFilm = filmDbStorage.create(nextFilm);
         lastFilm = filmDbStorage.create(lastFilm);
