@@ -214,7 +214,7 @@ public class FilmDbStorage implements Storage<Film> {
         boolean hasTitleCategory = queryCategories.contains("title");
         boolean hasDirectorCategory = queryCategories.contains("director");
 
-        String sql = "SELECT films.*, mpa.* " +
+        String sql = "SELECT DISTINCT films.*, mpa.* " +
                 "FROM film_director fd " +
                 "RIGHT JOIN films ON fd.film_id = films.id " +
                 (hasDirectorCategory ? "LEFT JOIN directors ON fd.director_id = directors.id " : "") +

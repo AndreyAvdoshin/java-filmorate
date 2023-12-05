@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static ru.yandex.practicum.filmorate.Constants.FILM_SORT_FIELDS;
 import static ru.yandex.practicum.filmorate.Constants.QUERY_CATEGORY_FIELDS;
@@ -87,6 +88,9 @@ public class FilmController extends Controller<Film> {
 
         if (!unknownCategories.isEmpty()) {
             throw new IncorrectParameterException(unknownCategories.toString());
+        }
+        if (!Pattern.matches("^[\\sа-яА-Яa-zA-Z0-9]+$", queryField)) {
+            throw new IncorrectParameterException(queryField);
         }
         return service.getFilmsByQueryFieldAndCategories(queryField, queryCategories);
     }

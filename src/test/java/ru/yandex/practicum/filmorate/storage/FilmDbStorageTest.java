@@ -272,4 +272,22 @@ public class FilmDbStorageTest {
                 .usingRecursiveComparison()
                 .isEqualTo(List.of(film, updatedFilm));
     }
+
+    @Test
+    void shouldGetFilmsByQueryFieldAndCategories() {
+        Director director1 = Director.builder().name("Новый режиссер").build();
+        Director director2 = Director.builder().name("Старый режиссер").build();
+        director1 = directorDbStorage.create(director1);
+        director2 = directorDbStorage.create(director2);
+
+        film.setDirectors(Set.of(director2));
+        filmDbStorage.create(film);
+        updatedFilm.setDirectors(Set.of(director1));
+        filmDbStorage.create(updatedFilm);
+
+        assertThat(filmDbStorage.getFilmsByQueryFieldAndCategories("нОвЫ", List.of("title", "director")))
+                .isNotNull()
+                .usingRecursiveComparison()
+                .isEqualTo(List.of(film, updatedFilm));
+    }
 }
