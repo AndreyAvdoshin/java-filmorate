@@ -55,6 +55,7 @@ public class UserController extends Controller<User> {
     public List<Event> getEvents(@PathVariable int id) {
         return service.getEvents(id);
     }
+
     @GetMapping("/{id}/recommendations")
     public List<Film> getRecommendations(@PathVariable int id) {
         return service.getRecommendations(id);
