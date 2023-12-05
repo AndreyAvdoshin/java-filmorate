@@ -23,10 +23,8 @@ public class FilmService extends BaseService<Film> {
     private final Storage<User> userStorage;
     private final LikeDbStorage likeDbStorage;
     private final FeedDbStorage feedDbStorage;
-    private final Storage<User> userStorage;
-    private final LikeDbStorage likeDbStorage;
-    private finalStorage<Director> directorDbStorage;
-    private finalFilmDbStorage filmDbStorage;
+    private final Storage<Director> directorDbStorage;
+    private final FilmDbStorage filmDbStorage;
 
     public FilmService(FilmDbStorage storage,
                        Storage<User> userStorage,
