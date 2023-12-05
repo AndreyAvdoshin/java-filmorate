@@ -178,9 +178,9 @@ public class FilmDbStorageTest {
         likeStorage.addLike(newNextFilm.getId(), user.getId());
         likeStorage.addLike(newNextFilm.getId(), newUser.getId());
         likeStorage.addLike(newFilm.getId(), user.getId());
-        List<Film> likes = filmDbStorage.getRatedFilms(10,999,999);
-        List<Film> likesGenre = filmDbStorage.getRatedFilms(10,2,999);
-        List<Film> likesYear = filmDbStorage.getRatedFilms(10,999,2000);
+        List<Film> likes = filmDbStorage.getRatedFilms(10,null,null);
+        List<Film> likesGenre = filmDbStorage.getRatedFilms(10,2,null);
+        List<Film> likesYear = filmDbStorage.getRatedFilms(10,null,2000);
         List<Film> likesYearAndGenre = filmDbStorage.getRatedFilms(10,2,2000);
 
         assertEquals(likes.get(0).getName(), newNextFilm.getName());
