@@ -56,6 +56,16 @@ public class UserDbStorage implements Storage<User> {
     }
 
     @Override
+    public void delete(int id) {
+        String sql = "DELETE FROM users WHERE id = ?";
+        int count = jdbcTemplate.update(sql, id);
+        if (count == 0) {
+            throw new NotFoundException("Пользователь по id " + id + " не найден");
+        }
+        log.info("Удален пользователь по id - {}", id);
+    }
+
+    @Override
     public User getEntityById(int id) {
         log.info("Запрос пользователя по id - {}", id);
         String sql = "SELECT * FROM users WHERE id = ?";

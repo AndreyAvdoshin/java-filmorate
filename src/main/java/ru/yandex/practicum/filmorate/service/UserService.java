@@ -6,10 +6,12 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Operation;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FeedDbStorage;
 import ru.yandex.practicum.filmorate.storage.FriendDbStorage;
 import ru.yandex.practicum.filmorate.storage.Storage;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import java.time.Instant;
 import java.util.List;
@@ -20,10 +22,13 @@ public class UserService extends BaseService<User> {
 
     private final FriendDbStorage friendDbStorage;
     private final FeedDbStorage feedDbStorage;
+    private final FilmDbStorage filmDbStorage;
 
-    public UserService(Storage<User> storage, FriendDbStorage friendDbStorage, FeedDbStorage feedDbStorage) {
+    public UserService(Storage<User> storage, FriendDbStorage friendDbStorage,
+                FeedDbStorage feedDbStorage, FilmDbStorage filmDbStorage) {
         super(storage);
         this.friendDbStorage = friendDbStorage;
+        this.filmDbStorage = filmDbStorage;
         this.feedDbStorage = feedDbStorage;
     }
 
@@ -50,12 +55,12 @@ public class UserService extends BaseService<User> {
     }
 
     public List<User> getFriends(int id) {
+        getEntity(id);
         return friendDbStorage.getFriends(id);
     }
 
     public List<User> getCommonFriends(int id, int otherId) {
         checkUsers(id, otherId);
-
         return friendDbStorage.getCommonFriends(id, otherId);
     }
 
@@ -74,5 +79,9 @@ public class UserService extends BaseService<User> {
     public List<Event> getEvents(int userId) {
         getEntity(userId); // Проверка юзера
         return feedDbStorage.getEventsByUserId(userId);
+    }
+
+    public List<Film> getRecommendations(int id) {
+        return filmDbStorage.getRecommendations(id);
     }
 }
