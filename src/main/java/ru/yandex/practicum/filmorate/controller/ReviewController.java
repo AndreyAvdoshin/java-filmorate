@@ -86,7 +86,7 @@ public class ReviewController {
         service.deleteReaction(id, userId, true);
     }
 
-    @DeleteMapping("{id}/dislike/{userId}")
+    @DeleteMapping("/{id}/dislike/{userId}")
     void deleteDislike(@PathVariable int id, @PathVariable int userId) {
         if (id <= 0) {
             throw new IncorrectParameterException("id");
