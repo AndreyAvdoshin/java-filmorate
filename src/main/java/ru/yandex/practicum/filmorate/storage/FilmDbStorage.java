@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -16,6 +17,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -27,6 +29,44 @@ public class FilmDbStorage implements Storage<Film> {
     private final GenreDbStorage genreDBStorage;
     private final LikeDbStorage likeDbStorage;
     private final DirectorDbStorage directorDbStorage;
+    private final String getPopularGenreAndYear = "SELECT f.*, COUNT(l.film_id) as likes_count, mpa.* " +
+            "FROM films f " +
+            "JOIN film_genre fg ON f.id = fg.film_id " +
+            "LEFT JOIN mpa ON f.mpa_id = mpa.id " +
+            "JOIN genres g ON fg.genre_id = g.id " +
+            "LEFT JOIN likes l ON f.id = l.film_id " +
+            "WHERE g.id  = ? AND EXTRACT(YEAR FROM f.release_date) = ? " +
+            "GROUP BY f.id " +
+            "ORDER BY likes_count DESC " +
+            "LIMIT ?";
+
+    private final String getPopularLike = "SELECT films.*, mpa.* " +
+            "FROM films " +
+            "LEFT JOIN mpa ON films.mpa_id = mpa.id " +
+            "LEFT JOIN likes ON films.id = likes.film_id " +
+            "GROUP BY films.id " +
+            "ORDER BY COUNT(likes.user_id) DESC " +
+            "LIMIT ?";
+
+    private final String getPopularYear = "SELECT f.*, COUNT(l.film_id) as likes_count, mpa.*" +
+            "FROM films f " +
+            "LEFT JOIN mpa ON f.mpa_id = mpa.id " +
+            "LEFT JOIN likes l ON f.id = l.film_id " +
+            "WHERE EXTRACT(YEAR FROM f.release_date) = ? " +
+            "GROUP BY f.id " +
+            "ORDER BY likes_count DESC " +
+            "LIMIT ?";
+
+    private final String getPopularGenre = "SELECT f.*, COUNT(l.film_id) as likes_count, mpa.*" +
+            "FROM films f " +
+            "LEFT JOIN mpa ON f.mpa_id = mpa.id " +
+            "JOIN film_genre fg ON f.id = fg.film_id " +
+            "JOIN genres g ON fg.genre_id = g.id " +
+            "LEFT JOIN likes l ON f.id = l.film_id " +
+            "WHERE g.id  = ? " +
+            "GROUP BY f.id " +
+            "ORDER BY likes_count DESC " +
+            "LIMIT ?";
 
     @Autowired
     public FilmDbStorage(JdbcTemplate jdbcTemplate,
@@ -178,6 +218,7 @@ public class FilmDbStorage implements Storage<Film> {
     }
 
     public List<Film> getRecommendations(int userId) {
+        log.info("Запрос рекомендационных фильмов для пользователя - {}", userId);
         String sql = "SELECT f.*, MPA.ID, mpa.NAME " +
                      "FROM likes l JOIN films f on f.id = l.film_id " + "JOIN mpa on mpa.id = f.mpa_id " +
                      "WHERE l.user_id = (SELECT l2.user_id " +
@@ -203,5 +244,54 @@ public class FilmDbStorage implements Storage<Film> {
                 "WHERE fd.director_id = ?" +
                 "ORDER BY films.release_date ASC";
         return jdbcTemplate.query(sql, new FilmMapper(genreDBStorage, likeDbStorage, directorDbStorage), directorId);
+    }
+
+    public List<Film> getRatedFilms(Integer count, Integer genreId, Integer releaseYear) {
+        List<Film> films;
+        log.info("Запрос фильмов по рейтингу");
+        if (genreId != null || releaseYear != null) {
+            if (genreId != null && releaseYear != null) {
+                films = jdbcTemplate.query(getPopularGenreAndYear, new FilmMapper(
+                        genreDBStorage,
+                        likeDbStorage,
+                        directorDbStorage), genreId, releaseYear, count);
+            } else if (genreId != null) {
+                    films = jdbcTemplate.query(getPopularGenre, new FilmMapper(
+                            genreDBStorage,
+                            likeDbStorage,
+                            directorDbStorage), genreId, count);
+
+                } else {
+                    films = jdbcTemplate.query(getPopularYear, new FilmMapper(
+                            genreDBStorage,
+                            likeDbStorage,
+                            directorDbStorage), releaseYear, count);
+                }
+        } else {
+            films = jdbcTemplate.query(getPopularLike, new FilmMapper(
+                    genreDBStorage,
+                    likeDbStorage,
+                    directorDbStorage), count);
+        }
+        return films;
+    }
+  
+    public List<Film> getFilmsByQueryFieldAndCategories(String queryField, List<String> queryCategories) {
+        log.info("Запрос фильмов по подстроке - {} и категориям - {}", queryField, queryCategories);
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        boolean hasTitleCategory = queryCategories.contains("title");
+        boolean hasDirectorCategory = queryCategories.contains("director");
+
+        String sql = "SELECT DISTINCT films.*, mpa.* " +
+                "FROM film_director fd " +
+                "RIGHT JOIN films ON fd.film_id = films.id " +
+                (hasDirectorCategory ? "LEFT JOIN directors ON fd.director_id = directors.id " : "") +
+                "INNER JOIN mpa ON films.mpa_id = mpa.id " +
+                "WHERE " +
+                (hasTitleCategory ? "LOWER(films.name) LIKE :queryField " : "1<>1 ") +
+                "OR " + (hasDirectorCategory ? "LOWER(directors.name) LIKE :queryField " : "1<>1 ") +
+                "ORDER BY films.release_date ASC";
+        return namedParameterJdbcTemplate.query(sql, Map.of("queryField", "%" + queryField.toLowerCase() + "%"),
+                new FilmMapper(genreDBStorage, likeDbStorage, directorDbStorage));
     }
 }

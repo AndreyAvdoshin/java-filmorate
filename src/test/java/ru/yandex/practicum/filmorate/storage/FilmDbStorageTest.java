@@ -177,26 +177,25 @@ public class FilmDbStorageTest {
                 .birthday(LocalDate.of(1980, 1, 1))
                 .build();
 
-        film = filmDbStorage.create(film);
-        updatedFilm = filmDbStorage.create(updatedFilm);
+        film.setGenres(Set.of(genreDBStorage.getEntityById(2)));
+        Film newFilm = filmDbStorage.create(film);
+        updatedFilm.setGenres(Set.of(genreDBStorage.getEntityById(1)));
+        Film newNextFilm = filmDbStorage.create(updatedFilm);
         user = userDbStorage.create(user);
         newUser = userDbStorage.create(newUser);
 
-        List<Film> likes = likeStorage.getRatedFilms(10);
-        assertThat(likes).isNotNull()
-                .usingRecursiveComparison()
-                .isEqualTo(List.of(film, updatedFilm));
+        likeStorage.addLike(newNextFilm.getId(), user.getId());
+        likeStorage.addLike(newNextFilm.getId(), newUser.getId());
+        likeStorage.addLike(newFilm.getId(), user.getId());
+        List<Film> likes = filmDbStorage.getRatedFilms(10,null,null);
+        List<Film> likesGenre = filmDbStorage.getRatedFilms(10,2,null);
+        List<Film> likesYear = filmDbStorage.getRatedFilms(10,null,2000);
+        List<Film> likesYearAndGenre = filmDbStorage.getRatedFilms(10,2,2000);
 
-        likeStorage.addLike(updatedFilm.getId(), user.getId());
-        likeStorage.addLike(updatedFilm.getId(), newUser.getId());
-        updatedFilm.setLike(user.getId());
-        updatedFilm.setLike(newUser.getId());
-
-        likes = likeStorage.getRatedFilms(10);
-
-        assertThat(likes).isNotNull()
-                .usingRecursiveComparison()
-                .isEqualTo(List.of(updatedFilm, film));
+        assertEquals(likes.get(0).getName(), newNextFilm.getName());
+        assertEquals(likesGenre.get(0).getName(), newFilm.getName());
+        assertEquals(likesYear.get(0).getName(), newFilm.getName());
+        assertEquals(likesYearAndGenre.get(0).getName(), newFilm.getName());
     }
 
     @Test
@@ -269,6 +268,24 @@ public class FilmDbStorageTest {
         filmDbStorage.create(updatedFilm);
 
         assertThat(filmDbStorage.getDirectorFilms(director1.getId())).isNotNull()
+                .usingRecursiveComparison()
+                .isEqualTo(List.of(film, updatedFilm));
+    }
+
+    @Test
+    void shouldGetFilmsByQueryFieldAndCategories() {
+        Director director1 = Director.builder().name("Новый режиссер").build();
+        Director director2 = Director.builder().name("Старый режиссер").build();
+        director1 = directorDbStorage.create(director1);
+        director2 = directorDbStorage.create(director2);
+
+        film.setDirectors(Set.of(director2));
+        filmDbStorage.create(film);
+        updatedFilm.setDirectors(Set.of(director1));
+        filmDbStorage.create(updatedFilm);
+
+        assertThat(filmDbStorage.getFilmsByQueryFieldAndCategories("нОвЫ", List.of("title", "director")))
+                .isNotNull()
                 .usingRecursiveComparison()
                 .isEqualTo(List.of(film, updatedFilm));
     }

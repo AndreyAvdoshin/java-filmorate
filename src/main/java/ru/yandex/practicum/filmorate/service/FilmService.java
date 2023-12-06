@@ -11,9 +11,7 @@ import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.LikeDbStorage;
 import ru.yandex.practicum.filmorate.storage.Storage;
 
-import java.time.Instant;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -74,14 +72,20 @@ public class FilmService extends BaseService<Film> {
         return directorFilms;
     }
 
-    public List<Film> getRatedFilms(int count) {
-        return likeDbStorage.getRatedFilms(count);
+    public List<Film> getRatedFilms(Integer count, Integer genreId, Integer releaseYear) {
+        return filmDbStorage.getRatedFilms(count, genreId, releaseYear);
     }
 
     public List<Film> getCommonFilms(int id, int friendId) {
         userStorage.getEntityById(id);
         userStorage.getEntityById(friendId);
         return filmDbStorage.getCommonFilms(id, friendId);
+    }
+
+    public List<Film> getFilmsByQueryFieldAndCategories(String queryField, List<String> queryCategories) {
+        return filmDbStorage.getFilmsByQueryFieldAndCategories(queryField, queryCategories).stream()
+                .sorted(Comparator.comparingInt(Film::getLikesCount).reversed().thenComparing(Film::getId))
+                .collect(Collectors.toList());
     }
 
 }
