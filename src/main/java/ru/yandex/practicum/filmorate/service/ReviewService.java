@@ -30,14 +30,15 @@ public class ReviewService extends BaseService<Review> {
     public Review create(Review review) {
         userStorage.getEntityById(review.getUserId());
         filmStorage.getEntityById(review.getFilmId());
+        Review newReview = storage.create(review);
         feedStorage.addEvent(Event.builder()
                 .timestamp(Instant.now().toEpochMilli())
-                .userId(review.getUserId())
+                .userId(newReview.getUserId())
                 .eventType(EventType.REVIEW)
                 .operation(Operation.ADD)
-                .entityId(review.getFilmId())
+                .entityId(newReview.getReviewId())
                 .build());
-        return storage.create(review);
+        return newReview;
     }
 
     @Override
@@ -50,7 +51,7 @@ public class ReviewService extends BaseService<Review> {
                 .userId(review.getUserId())
                 .eventType(EventType.REVIEW)
                 .operation(Operation.UPDATE)
-                .entityId(review.getFilmId())
+                .entityId(review.getReviewId())
                 .build());
         return review;
     }

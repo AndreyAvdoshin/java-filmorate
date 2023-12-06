@@ -1,33 +1,53 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.NonNull;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
-import ru.yandex.practicum.filmorate.exception.NotAllowedException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
+import ru.yandex.practicum.filmorate.service.Validator;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/reviews")
-public class ReviewController extends Controller<Review> {
+public class ReviewController {
 
     private final ReviewService service;
 
     public ReviewController(ReviewService service) {
-        super(service);
+        //super(service);
         this.service = service;
     }
 
-    @Override
-    @GetMapping("/all")
-    public List<Review> get() {
-        throw new NotAllowedException("Метод не разрешен для данного ресурса");
+    @GetMapping("/{id}")
+    public Review getById(@PathVariable int id) {
+        return service.getEntity(id);
     }
 
-    @GetMapping
+    //@Override
+    @PostMapping()
+    public Review create(@Valid @RequestBody Review review) {
+        Validator.validate(review);
+        return service.create(review);
+    }
+
+    @PutMapping()
+    public Review update(@Valid @RequestBody @NonNull Review review) {
+        Validator.validate(review);
+        return service.update(review);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable int id) {
+        service.delete(id);
+    }
+
+    @GetMapping()
     public List<Review> getReviewsByFilmId(@RequestParam(required = false) Integer filmId,
                                           @RequestParam(defaultValue = "10") int count) {
+        System.out.println(count);
         if (filmId == null) {
             return service.getReviewsWithQueryParams(count);
         } else if (filmId <= 0) {
@@ -69,7 +89,7 @@ public class ReviewController extends Controller<Review> {
         service.deleteReaction(id, userId, true);
     }
 
-    @DeleteMapping("/{id}/dislike/{userId}")
+    @DeleteMapping("{id}/dislike/{userId}")
     void deleteDislike(@PathVariable int id, @PathVariable int userId) {
         if (id <= 0) {
             throw new IncorrectParameterException("id");
