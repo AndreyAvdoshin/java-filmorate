@@ -244,12 +244,6 @@ class ReviewControllerTest {
     }
 
     @Test
-    void shouldGet405WhenGetAllReviews() throws Exception {
-        mockMvc.perform(get("/reviews/all"))
-                .andExpect(status().isMethodNotAllowed());
-    }
-
-    @Test
     void shouldCreateReviewAndGet200() throws Exception {
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)

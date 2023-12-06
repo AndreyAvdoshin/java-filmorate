@@ -3,10 +3,17 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.model.Operation;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.FeedDbStorage;
+import ru.yandex.practicum.filmorate.storage.FriendDbStorage;
+import ru.yandex.practicum.filmorate.storage.Storage;
 import ru.yandex.practicum.filmorate.storage.*;
 
+import java.time.Instant;
 import java.util.List;
 
 @Slf4j
@@ -14,22 +21,37 @@ import java.util.List;
 public class UserService extends BaseService<User> {
 
     private final FriendDbStorage friendDbStorage;
+    private final FeedDbStorage feedDbStorage;
     private final FilmDbStorage filmDbStorage;
 
-    public UserService(Storage<User> storage, FriendDbStorage friendDbStorage, FilmDbStorage filmDbStorage) {
+    public UserService(Storage<User> storage, FriendDbStorage friendDbStorage,
+                FeedDbStorage feedDbStorage, FilmDbStorage filmDbStorage) {
         super(storage);
         this.friendDbStorage = friendDbStorage;
         this.filmDbStorage = filmDbStorage;
+        this.feedDbStorage = feedDbStorage;
     }
 
     public void createFriendship(int firstUserId, int secondUserId) {
         checkUsers(firstUserId, secondUserId);
         friendDbStorage.createFriendship(firstUserId, secondUserId);
+        feedDbStorage.addEvent(Event.builder()
+                .timestamp(Instant.now().toEpochMilli())
+                .userId(firstUserId)
+                .eventType(EventType.FRIEND)
+                .operation(Operation.ADD)
+                .entityId(secondUserId).build());
     }
 
     public void deleteFriend(int firstUserId, int secondUserId) {
         checkUsers(firstUserId, secondUserId);
         friendDbStorage.deleteFriend(firstUserId, secondUserId);
+        feedDbStorage.addEvent(Event.builder()
+                .timestamp(Instant.now().toEpochMilli())
+                .userId(firstUserId)
+                .eventType(EventType.FRIEND)
+                .operation(Operation.REMOVE)
+                .entityId(secondUserId).build());
     }
 
     public List<User> getFriends(int id) {
@@ -52,6 +74,11 @@ public class UserService extends BaseService<User> {
     public void checkUsers(int firstUserId, int secondUserId) {
         getEntity(firstUserId);
         getEntity(secondUserId);
+    }
+
+    public List<Event> getEvents(int userId) {
+        getEntity(userId);
+        return feedDbStorage.getEventsByUserId(userId);
     }
 
     public List<Film> getRecommendations(int id) {

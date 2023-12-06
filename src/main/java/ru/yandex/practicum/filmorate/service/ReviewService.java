@@ -1,40 +1,71 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.FeedDbStorage;
 import ru.yandex.practicum.filmorate.storage.ReviewDbStorage;
 import ru.yandex.practicum.filmorate.storage.Storage;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
 public class ReviewService extends BaseService<Review> {
 
-    ReviewDbStorage storage;
-    Storage<User> userStorage;
-    Storage<Film> filmStorage;
+    private final ReviewDbStorage storage;
+    private final Storage<User> userStorage;
+    private final Storage<Film> filmStorage;
+    private final FeedDbStorage feedStorage;
 
-    public ReviewService(ReviewDbStorage storage, Storage<User> userStorage, Storage<Film> filmStorage) {
+    public ReviewService(ReviewDbStorage storage, Storage<User> userStorage,
+                         Storage<Film> filmStorage, FeedDbStorage feedStorage) {
         super(storage);
         this.storage = storage;
         this.userStorage = userStorage;
         this.filmStorage = filmStorage;
+        this.feedStorage = feedStorage;
     }
 
     @Override
     public Review create(Review review) {
         userStorage.getEntityById(review.getUserId());
         filmStorage.getEntityById(review.getFilmId());
-        return storage.create(review);
+        Review newReview = storage.create(review);
+        feedStorage.addEvent(Event.builder()
+                .timestamp(Instant.now().toEpochMilli())
+                .userId(newReview.getUserId())
+                .eventType(EventType.REVIEW)
+                .operation(Operation.ADD)
+                .entityId(newReview.getReviewId())
+                .build());
+        return newReview;
     }
 
     @Override
     public Review update(Review review) {
         userStorage.getEntityById(review.getUserId());
         filmStorage.getEntityById(review.getFilmId());
-        return storage.update(review);
+        review = storage.update(review);
+        feedStorage.addEvent(Event.builder()
+                .timestamp(Instant.now().toEpochMilli())
+                .userId(review.getUserId())
+                .eventType(EventType.REVIEW)
+                .operation(Operation.UPDATE)
+                .entityId(review.getReviewId())
+                .build());
+        return review;
+    }
+
+    @Override
+    public void delete(int id) {
+        feedStorage.addEvent(Event.builder()
+                .timestamp(Instant.now().toEpochMilli())
+                .userId(storage.getEntityById(id).getUserId())
+                .eventType(EventType.REVIEW)
+                .operation(Operation.REMOVE)
+                .entityId(id)
+                .build());
+        storage.delete(id);
     }
 
     public List<Review> getReviewsWithQueryParams(int count) {

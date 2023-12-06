@@ -27,9 +27,9 @@ public class Review extends Entity {
     private String content;
     @NotNull
     private Boolean isPositive;
-    @NonNull
+    @NotNull
     private Integer userId;
-    @NonNull
+    @NotNull
     private Integer filmId;
     private int useful = 0;
 
