@@ -77,7 +77,7 @@ public class UserService extends BaseService<User> {
     }
 
     public List<Event> getEvents(int userId) {
-        getEntity(userId); // Проверка юзера
+        getEntity(userId);
         return feedDbStorage.getEventsByUserId(userId);
     }
 
