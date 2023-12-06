@@ -41,7 +41,6 @@ public class FilmService extends BaseService<Film> {
     public void addLike(int filmId, int userId) {
         getEntity(filmId);
         userStorage.getEntityById(userId);
-        likeDbStorage.addLike(filmId, userId);
         feedDbStorage.addEvent(Event.builder()
                 .timestamp(Instant.now().toEpochMilli())
                 .userId(userId)
@@ -49,12 +48,12 @@ public class FilmService extends BaseService<Film> {
                 .operation(Operation.ADD)
                 .entityId(filmId)
                 .build());
+        likeDbStorage.addLike(filmId, userId);
     }
 
     public void deleteLike(int filmId, int userId) {
         getEntity(filmId);
         userStorage.getEntityById(userId);
-        likeDbStorage.deleteLike(filmId, userId);
         feedDbStorage.addEvent(Event.builder()
                 .timestamp(Instant.now().toEpochMilli())
                 .userId(userId)
@@ -62,6 +61,7 @@ public class FilmService extends BaseService<Film> {
                 .operation(Operation.REMOVE)
                 .entityId(filmId)
                 .build());
+        likeDbStorage.deleteLike(filmId, userId);
     }
 
     public List<Film> getDirectorFilmsBySortField(int directorId, String sortField) {
