@@ -17,7 +17,6 @@ public class ReviewController {
     private final ReviewService service;
 
     public ReviewController(ReviewService service) {
-        //super(service);
         this.service = service;
     }
 
@@ -26,7 +25,6 @@ public class ReviewController {
         return service.getEntity(id);
     }
 
-    //@Override
     @PostMapping()
     public Review create(@Valid @RequestBody Review review) {
         Validator.validate(review);
@@ -47,7 +45,6 @@ public class ReviewController {
     @GetMapping()
     public List<Review> getReviewsByFilmId(@RequestParam(required = false) Integer filmId,
                                           @RequestParam(defaultValue = "10") int count) {
-        System.out.println(count);
         if (filmId == null) {
             return service.getReviewsWithQueryParams(count);
         } else if (filmId <= 0) {

@@ -275,7 +275,7 @@ public class FilmDbStorage implements Storage<Film> {
         }
         return films;
     }
-  
+
     public List<Film> getFilmsByQueryFieldAndCategories(String queryField, List<String> queryCategories) {
         log.info("Запрос фильмов по подстроке - {} и категориям - {}", queryField, queryCategories);
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);

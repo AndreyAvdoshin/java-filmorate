@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.LikeDbStorage;
 import ru.yandex.practicum.filmorate.storage.Storage;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,7 +47,8 @@ public class FilmService extends BaseService<Film> {
                 .userId(userId)
                 .eventType(EventType.LIKE)
                 .operation(Operation.ADD)
-                .entityId(filmId).build());
+                .entityId(filmId)
+                .build());
     }
 
     public void deleteLike(int filmId, int userId) {
@@ -58,7 +60,8 @@ public class FilmService extends BaseService<Film> {
                 .userId(userId)
                 .eventType(EventType.LIKE)
                 .operation(Operation.REMOVE)
-                .entityId(filmId).build());
+                .entityId(filmId)
+                .build());
     }
 
     public List<Film> getDirectorFilmsBySortField(int directorId, String sortField) {
