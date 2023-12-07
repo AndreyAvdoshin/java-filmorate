@@ -25,7 +25,6 @@ public class UserController extends Controller<User> {
 
     @Override
     public User create(@Valid @RequestBody User user) {
-        // проверка на пустое имя
         user = service.checkName(user);
         super.create(user);
         return user;

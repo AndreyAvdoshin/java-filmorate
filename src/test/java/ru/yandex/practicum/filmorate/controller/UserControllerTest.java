@@ -238,7 +238,6 @@ class UserControllerTest {
 
         mockMvc.perform(get("/users/1/friends"))
                 .andExpect(status().isOk())
-                // Ожидаем, что возвращенный JSON содержит ожидаемый список друзей
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].email").value("aaa@bbb.eee"))

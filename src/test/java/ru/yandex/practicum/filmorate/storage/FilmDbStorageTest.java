@@ -267,6 +267,8 @@ public class FilmDbStorageTest {
         updatedFilm.setDirectors(Set.of(director2, director1));
         filmDbStorage.create(updatedFilm);
 
+        film.setDirectors(new HashSet<>());
+        updatedFilm.setDirectors(new HashSet<>());
         assertThat(filmDbStorage.getDirectorFilms(director1.getId())).isNotNull()
                 .usingRecursiveComparison()
                 .isEqualTo(List.of(film, updatedFilm));
@@ -284,6 +286,8 @@ public class FilmDbStorageTest {
         updatedFilm.setDirectors(Set.of(director1));
         filmDbStorage.create(updatedFilm);
 
+        film.setDirectors(new HashSet<>());
+        updatedFilm.setDirectors(new HashSet<>());
         assertThat(filmDbStorage.getFilmsByQueryFieldAndCategories("нОвЫ", List.of("title", "director")))
                 .isNotNull()
                 .usingRecursiveComparison()

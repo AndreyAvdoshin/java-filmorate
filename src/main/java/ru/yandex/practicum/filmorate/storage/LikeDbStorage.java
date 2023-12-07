@@ -16,15 +16,9 @@ import java.util.Set;
 public class LikeDbStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final GenreDbStorage genreDBStorage;
-    private final DirectorDbStorage directorDbStorage;
 
-    public LikeDbStorage(JdbcTemplate jdbcTemplate,
-                         GenreDbStorage genreDBStorage,
-                         DirectorDbStorage directorDbStorage) {
+    public LikeDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.genreDBStorage = genreDBStorage;
-        this.directorDbStorage = directorDbStorage;
     }
 
     public void addLike(int filmId, int userId) {

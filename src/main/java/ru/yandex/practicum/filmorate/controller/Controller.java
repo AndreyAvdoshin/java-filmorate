@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Entity;
 import ru.yandex.practicum.filmorate.service.BaseService;
-import ru.yandex.practicum.filmorate.service.Validator;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -31,13 +30,11 @@ public abstract class Controller<T extends Entity> {
 
     @PostMapping
     public T create(@Valid @RequestBody T entity) {
-        Validator.validate(entity);
         return baseService.create(entity);
     }
 
     @PutMapping
     public T update(@Valid @RequestBody @NonNull T entity) {
-        Validator.validate(entity);
         return baseService.update(entity);
     }
 

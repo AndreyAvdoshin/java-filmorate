@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
-import ru.yandex.practicum.filmorate.service.Validator;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -27,13 +26,11 @@ public class ReviewController {
 
     @PostMapping()
     public Review create(@Valid @RequestBody Review review) {
-        Validator.validate(review);
         return service.create(review);
     }
 
     @PutMapping()
     public Review update(@Valid @RequestBody @NonNull Review review) {
-        Validator.validate(review);
         return service.update(review);
     }
 

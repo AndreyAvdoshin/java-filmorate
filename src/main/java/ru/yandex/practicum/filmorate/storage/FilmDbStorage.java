@@ -25,9 +25,7 @@ import java.util.stream.Collectors;
 public class FilmDbStorage implements Storage<Film> {
 
     private final JdbcTemplate jdbcTemplate;
-    private final MpaDbStorage mpaDBStorage;
-    private final GenreDbStorage genreDBStorage;
-    private final DirectorDbStorage directorDbStorage;
+
     private final String getPopularGenreAndYear = "SELECT f.*, COUNT(l.film_id) as likes_count, mpa.* " +
             "FROM films f " +
             "JOIN film_genre fg ON f.id = fg.film_id " +
@@ -68,15 +66,8 @@ public class FilmDbStorage implements Storage<Film> {
             "LIMIT ?";
 
     @Autowired
-    public FilmDbStorage(JdbcTemplate jdbcTemplate,
-                         MpaDbStorage mpaDBStorage,
-                         GenreDbStorage genreDBStorage,
-                         DirectorDbStorage directorDbStorage
-    ) {
+    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.mpaDBStorage = mpaDBStorage;
-        this.genreDBStorage = genreDBStorage;
-        this.directorDbStorage = directorDbStorage;
     }
 
     @Override
@@ -122,13 +113,11 @@ public class FilmDbStorage implements Storage<Film> {
         if (count == 0) {
             throw new NotFoundException("Фильм по id " + film.getId() + " не найден");
         }
-        // Перезаписываем жанры и режиссеров
         sql = "DELETE film_genre WHERE film_id = ?";
         jdbcTemplate.update(sql, film.getId());
         sql = "DELETE film_director WHERE film_id = ?";
         jdbcTemplate.update(sql, film.getId());
 
-        //Получение id всех жанров фильма
         List<Integer> genres = film.getGenres().stream().map(Genre::getId).collect(Collectors.toList());
         sql = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
@@ -144,7 +133,6 @@ public class FilmDbStorage implements Storage<Film> {
             }
         });
 
-        //Получение id всех режиссеров фильма
         List<Integer> directors = film.getDirectors().stream()
                 .map(Director::getId)
                 .collect(Collectors.toList());

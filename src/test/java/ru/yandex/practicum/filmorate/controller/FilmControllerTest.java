@@ -128,6 +128,15 @@ class FilmControllerTest {
     }
 
     @Test
+    void shouldGet400WhenCreateFilmWithReleaseDateBeforeSystemDate() throws Exception {
+        film.setReleaseDate(LocalDate.of(1895, 12, 27));
+        mockMvc.perform(post("/films")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(film)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void shouldUpdateFilmAndGet200() throws Exception {
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -146,6 +155,16 @@ class FilmControllerTest {
                 .andExpect(jsonPath("$.description").value("Иное описание фильма"))
                 .andExpect(jsonPath("$.releaseDate").value("2000-01-01"))
                 .andExpect(jsonPath("$.duration").value("100"));
+    }
+
+    @Test
+    void shouldGet400WhenUpdateFilmWithReleaseDateBeforeSystemDate() throws Exception {
+        filmController.create(film);
+        film.setReleaseDate(LocalDate.of(1895, 12, 27));
+        mockMvc.perform(put("/films")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(film)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -201,7 +220,7 @@ class FilmControllerTest {
     }
 
     @Test
-    void shouldGet500WhenUpdateIncorrectId() throws Exception {
+    void shouldGet404WhenUpdateIncorrectId() throws Exception {
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(film)))
@@ -227,7 +246,7 @@ class FilmControllerTest {
     }
 
     @Test
-    void shouldGet500WhenReleaseDateEarler1895() throws Exception {
+    void shouldGet400WhenReleaseDateEarler1895() throws Exception {
         film = Film.builder()
                 .name("Неправильный фильм")
                 .description("Описание фильма с неправильной датой")

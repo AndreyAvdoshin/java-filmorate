@@ -45,7 +45,12 @@ public class UserDbStorage implements Storage<User> {
     @Override
     public User update(User user) {
         String sql = "UPDATE users SET name = ?, login = ?, email = ?, birthday = ? WHERE id = ?";
-        int count = jdbcTemplate.update(sql, user.getName(), user.getLogin(), user.getEmail(), user.getBirthday(), user.getId());
+        int count = jdbcTemplate.update(sql,
+                user.getName(),
+                user.getLogin(),
+                user.getEmail(),
+                user.getBirthday(),
+                user.getId());
         if (count == 0) {
             throw new NotFoundException("Пользователь по id " + user.getId() + " не найден");
         }
@@ -68,9 +73,7 @@ public class UserDbStorage implements Storage<User> {
         log.info("Запрос пользователя по id - {}", id);
         String sql = "SELECT * FROM users WHERE id = ?";
         try {
-            return jdbcTemplate.queryForObject(sql, new Object[]{id}, new UserMapper(
-                    //friendStorage
-            ));
+            return jdbcTemplate.queryForObject(sql, new Object[]{id}, new UserMapper());
         } catch (IncorrectResultSizeDataAccessException e) {
             throw new NotFoundException("Пользователь не найден по id - " + id);
         }
