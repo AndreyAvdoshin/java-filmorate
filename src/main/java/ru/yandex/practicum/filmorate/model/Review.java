@@ -1,11 +1,8 @@
 package ru.yandex.practicum.filmorate.model;
 
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.Column;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
@@ -17,12 +14,8 @@ import java.util.Map;
 @AllArgsConstructor
 public class Review extends Entity {
 
-    @JsonIgnore
+    @JsonProperty("reviewId")
     private int id;
-
-    @AttributeOverride(name = "id", column = @Column(name = "reviewId"))
-    private int reviewId;
-    @NonNull
     @NotBlank
     private String content;
     @NotNull

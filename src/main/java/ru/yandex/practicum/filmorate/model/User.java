@@ -21,7 +21,6 @@ public class User extends Entity {
     @Email
     private String email;
 
-    @NonNull
     @NotBlank
     private String login;
 

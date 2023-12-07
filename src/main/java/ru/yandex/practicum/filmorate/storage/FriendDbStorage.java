@@ -47,7 +47,7 @@ public class FriendDbStorage {
     public List<User> getFriends(int id) {
         log.info("Запрос друзей пользователя - {}", id);
         String sql = "SELECT * FROM users WHERE id IN (SELECT friend_id FROM friendship WHERE user_id = ?)";
-        return jdbcTemplate.query(sql, new UserMapper(this), id);
+        return jdbcTemplate.query(sql, new UserMapper(), id);
     }
 
     public List<User> getCommonFriends(int id, int otherId) {
@@ -57,7 +57,7 @@ public class FriendDbStorage {
                 "INNER JOIN FRIENDSHIP f2 ON f.FRIEND_ID = f2.FRIEND_ID " +
                 "WHERE f.USER_ID = ? AND f2.USER_ID = ?)";
         try {
-            return jdbcTemplate.query(sql, new UserMapper(this), id, otherId);
+            return jdbcTemplate.query(sql, new UserMapper(), id, otherId);
         } catch (IncorrectResultSizeDataAccessException e) {
             return new ArrayList<>();
         }

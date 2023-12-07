@@ -214,11 +214,11 @@ class ReviewDbStorageTest {
         filmDbStorage.create(film2);
         review1 = reviewDbStorage.create(review1);
 
-        reviewDbStorage.delete(review1.getReviewId());
+        reviewDbStorage.delete(review1.getId());
 
         final NotFoundException exception = assertThrows(
                 NotFoundException.class,
-                () -> reviewDbStorage.getEntityById(review1.getReviewId())
+                () -> reviewDbStorage.getEntityById(review1.getId())
         );
     }
 

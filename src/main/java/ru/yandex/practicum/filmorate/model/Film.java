@@ -21,11 +21,9 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 public class Film extends Entity {
 
-    @NonNull
     @NotBlank
     private String name;
 
-    @NonNull
     @NotBlank
     @Size(max = 200, message = "Описание не должно превышать 200 символов")
     private String description;

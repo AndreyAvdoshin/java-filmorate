@@ -17,19 +17,17 @@ import java.util.List;
 public class UserDbStorage implements Storage<User> {
 
     private final JdbcTemplate jdbcTemplate;
-    private final FriendDbStorage friendStorage;
 
     @Autowired
-    public UserDbStorage(JdbcTemplate jdbcTemplate, FriendDbStorage friendStorage) {
+    public UserDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.friendStorage = friendStorage;
     }
 
     @Override
     public List<User> get() {
         log.info("Запрос всех пользователей");
         String sql = "SELECT * FROM users";
-        return jdbcTemplate.query(sql, new UserMapper(friendStorage));
+        return jdbcTemplate.query(sql, new UserMapper());
     }
 
     @Override
@@ -70,7 +68,9 @@ public class UserDbStorage implements Storage<User> {
         log.info("Запрос пользователя по id - {}", id);
         String sql = "SELECT * FROM users WHERE id = ?";
         try {
-            return jdbcTemplate.queryForObject(sql, new Object[]{id}, new UserMapper(friendStorage));
+            return jdbcTemplate.queryForObject(sql, new Object[]{id}, new UserMapper(
+                    //friendStorage
+            ));
         } catch (IncorrectResultSizeDataAccessException e) {
             throw new NotFoundException("Пользователь не найден по id - " + id);
         }

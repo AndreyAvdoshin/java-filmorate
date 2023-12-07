@@ -28,7 +28,7 @@ class UserDbStorageTest {
     @Autowired
     public UserDbStorageTest(JdbcTemplate jdbcTemplate) {
         this.friendDbStorage = new FriendDbStorage(jdbcTemplate);
-        this.userDbStorage = new UserDbStorage(jdbcTemplate, friendDbStorage);
+        this.userDbStorage = new UserDbStorage(jdbcTemplate);
     }
 
     @BeforeEach

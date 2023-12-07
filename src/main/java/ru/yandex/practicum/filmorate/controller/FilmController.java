@@ -47,7 +47,7 @@ public class FilmController extends Controller<Film> {
     }
 
     @GetMapping("/popular")
-    public List<Film> getRatedFilms(@RequestParam(defaultValue = "10", required = false) @Positive Integer count,
+    public List<Film> getRatedFilms(@RequestParam(defaultValue = "10") @Positive Integer count,
                                     @RequestParam(required = false) @Positive Integer genreId,
                                     @RequestParam(required = false) @Positive Integer year) {
         if (count <= 0) {

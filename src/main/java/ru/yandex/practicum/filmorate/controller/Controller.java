@@ -13,37 +13,37 @@ import java.util.List;
 @Slf4j
 public abstract class Controller<T extends Entity> {
 
-    private final BaseService<T> service;
+    private final BaseService<T> baseService;
 
     public Controller(BaseService<T> service) {
-        this.service = service;
+        this.baseService = service;
     }
 
     @GetMapping
     public List<T> get() {
-        return service.get();
+        return baseService.get();
     }
 
     @GetMapping("/{id}")
     public T getById(@PathVariable int id) {
-        return service.getEntity(id);
+        return baseService.getEntity(id);
     }
 
     @PostMapping
     public T create(@Valid @RequestBody T entity) {
         Validator.validate(entity);
-        return service.create(entity);
+        return baseService.create(entity);
     }
 
     @PutMapping
     public T update(@Valid @RequestBody @NonNull T entity) {
         Validator.validate(entity);
-        return service.update(entity);
+        return baseService.update(entity);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable int id) {
-        service.delete(id);
+        baseService.delete(id);
     }
 
 }

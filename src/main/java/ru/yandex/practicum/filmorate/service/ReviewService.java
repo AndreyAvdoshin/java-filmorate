@@ -36,7 +36,7 @@ public class ReviewService extends BaseService<Review> {
                 .userId(newReview.getUserId())
                 .eventType(EventType.REVIEW)
                 .operation(Operation.ADD)
-                .entityId(newReview.getReviewId())
+                .entityId(newReview.getId())
                 .build());
         return newReview;
     }
@@ -51,7 +51,7 @@ public class ReviewService extends BaseService<Review> {
                 .userId(review.getUserId())
                 .eventType(EventType.REVIEW)
                 .operation(Operation.UPDATE)
-                .entityId(review.getReviewId())
+                .entityId(review.getId())
                 .build());
         return review;
     }

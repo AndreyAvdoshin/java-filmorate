@@ -41,7 +41,7 @@ public class ReviewDbStorage implements Storage<Review> {
                 .usingGeneratedKeyColumns("id");
         Number key = simpleJdbcInsert.executeAndReturnKey(review.toMap());
 
-        review.setReviewId(key.intValue());
+        review.setId(key.intValue());
         log.info("Создан отзыв {}", review);
         return review;
     }
@@ -49,12 +49,12 @@ public class ReviewDbStorage implements Storage<Review> {
     @Override
     public Review update(Review review) {
         String sql = "UPDATE reviews SET content = ?, is_positive = ? WHERE id = ?";
-        int count = jdbcTemplate.update(sql, review.getContent(), review.getIsPositive(), review.getReviewId());
+        int count = jdbcTemplate.update(sql, review.getContent(), review.getIsPositive(), review.getId());
         if (count == 0) {
-            throw new NotFoundException("Отзыв по id " + review.getReviewId() + " не найден");
+            throw new NotFoundException("Отзыв по id " + review.getId() + " не найден");
         }
-        log.info("Обновлен отзыв по id - {}", review.getReviewId());
-        return getEntityById(review.getReviewId());
+        log.info("Обновлен отзыв по id - {}", review.getId());
+        return getEntityById(review.getId());
     }
 
     @Override

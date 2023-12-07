@@ -3,13 +3,8 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.*;
-import ru.yandex.practicum.filmorate.storage.FeedDbStorage;
-import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.storage.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.LikeDbStorage;
-import ru.yandex.practicum.filmorate.storage.Storage;
 
 import java.time.Instant;
 import java.util.*;
@@ -19,28 +14,57 @@ import java.util.stream.Collectors;
 @Service
 public class FilmService extends BaseService<Film> {
 
-    private final Storage<User> userStorage;
+    private final UserDbStorage userStorage;
     private final LikeDbStorage likeDbStorage;
     private final FeedDbStorage feedDbStorage;
-    private final Storage<Director> directorDbStorage;
+    private final DirectorDbStorage directorDbStorage;
     private final FilmDbStorage filmDbStorage;
+    private final GenreDbStorage genreDbStorage;
+    private final MpaDbStorage mpaDbStorage;
 
     public FilmService(FilmDbStorage storage,
-                       Storage<User> userStorage,
+                       UserDbStorage userStorage,
                        LikeDbStorage likeDbStorage,
                        FeedDbStorage feedDbStorage,
-                       Storage<Director> directorDbStorage) {
+                       DirectorDbStorage directorDbStorage,
+                       GenreDbStorage genreDbStorage,
+                       MpaDbStorage mpaDbStorage) {
         super(storage);
         this.filmDbStorage = storage;
         this.userStorage = userStorage;
         this.likeDbStorage = likeDbStorage;
         this.directorDbStorage = directorDbStorage;
         this.feedDbStorage = feedDbStorage;
+        this.genreDbStorage = genreDbStorage;
+        this.mpaDbStorage = mpaDbStorage;
+    }
+
+    @Override
+    public List<Film> get() {
+        return storage.get()
+                .stream().map(this::buildFilmWithDetails)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Film getEntity(int id) {
+        return buildFilmWithDetails(storage.getEntityById(id));
+    }
+
+    @Override
+    public Film create(Film film) {
+        film = storage.create(film);
+        film.setMpa(mpaDbStorage.getEntityById(film.getMpa().getId()));
+        return buildFilmWithDetails(film);
+    }
+
+    @Override
+    public Film update(Film film) {
+        return buildFilmWithDetails(storage.update(film));
     }
 
     public void addLike(int filmId, int userId) {
-        getEntity(filmId);
-        userStorage.getEntityById(userId);
+        checkUserAndFilm(userId, filmId);
         feedDbStorage.addEvent(Event.builder()
                 .timestamp(Instant.now().toEpochMilli())
                 .userId(userId)
@@ -52,8 +76,7 @@ public class FilmService extends BaseService<Film> {
     }
 
     public void deleteLike(int filmId, int userId) {
-        getEntity(filmId);
-        userStorage.getEntityById(userId);
+        checkUserAndFilm(userId, filmId);
         feedDbStorage.addEvent(Event.builder()
                 .timestamp(Instant.now().toEpochMilli())
                 .userId(userId)
@@ -66,29 +89,65 @@ public class FilmService extends BaseService<Film> {
 
     public List<Film> getDirectorFilmsBySortField(int directorId, String sortField) {
         directorDbStorage.getEntityById(directorId);
-        List<Film> directorFilms = filmDbStorage.getDirectorFilms(directorId);
+        List<Film> directorFilms = filmDbStorage
+                .getDirectorFilms(directorId)
+                .stream()
+                .map(this::buildFilmWithDetails)
+                .collect(Collectors.toList());
         if (sortField.equals("likes")) {
-            return directorFilms.stream()
-                    .sorted(Comparator.comparingInt(Film::getLikesCount).reversed().thenComparing(Film::getId))
-                    .collect(Collectors.toList());
+            directorFilms.sort(Comparator.comparingInt(Film::getLikesCount)
+                    .reversed()
+                    .thenComparing(Film::getId));
         }
         return directorFilms;
     }
 
     public List<Film> getRatedFilms(Integer count, Integer genreId, Integer releaseYear) {
-        return filmDbStorage.getRatedFilms(count, genreId, releaseYear);
+        return filmDbStorage
+                .getRatedFilms(count, genreId, releaseYear)
+                .stream()
+                .map(this::buildFilmWithDetails)
+                .collect(Collectors.toList());
     }
 
-    public List<Film> getCommonFilms(int id, int friendId) {
-        userStorage.getEntityById(id);
-        userStorage.getEntityById(friendId);
-        return filmDbStorage.getCommonFilms(id, friendId);
+    public List<Film> getCommonFilms(int userId, int friendId) {
+        checkUsers(userId, friendId);
+        return filmDbStorage.getCommonFilms(userId, friendId)
+                .stream()
+                .map(this::buildFilmWithDetails)
+                .collect(Collectors.toList());
+    }
+
+    public List<Film> getRecommendations(int userId) {
+        return filmDbStorage.getRecommendations(userId)
+                .stream()
+                .map(this::buildFilmWithDetails)
+                .collect(Collectors.toList());
     }
 
     public List<Film> getFilmsByQueryFieldAndCategories(String queryField, List<String> queryCategories) {
-        return filmDbStorage.getFilmsByQueryFieldAndCategories(queryField, queryCategories).stream()
+        return filmDbStorage.getFilmsByQueryFieldAndCategories(queryField, queryCategories)
+                .stream()
+                .map(this::buildFilmWithDetails)
                 .sorted(Comparator.comparingInt(Film::getLikesCount).reversed().thenComparing(Film::getId))
                 .collect(Collectors.toList());
+    }
+
+    private Film buildFilmWithDetails(Film film) {
+        film.setGenres(genreDbStorage.getAllGenresByFilmId(film.getId()));
+        film.setDirectors(directorDbStorage.getAllDirectorsByFilmId(film.getId()));
+        film.setLikes(likeDbStorage.getLikesByFilmId(film.getId()));
+        return film;
+    }
+
+    private void checkUserAndFilm(int userId, int filmId) {
+        userStorage.getEntityById(userId);
+        getEntity(filmId);
+    }
+
+    private void checkUsers(int userId, int friendId) {
+        userStorage.getEntityById(userId);
+        userStorage.getEntityById(friendId);
     }
 
 }

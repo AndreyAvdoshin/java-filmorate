@@ -15,6 +15,7 @@ import ru.yandex.practicum.filmorate.storage.*;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -22,14 +23,29 @@ public class UserService extends BaseService<User> {
 
     private final FriendDbStorage friendDbStorage;
     private final FeedDbStorage feedDbStorage;
-    private final FilmDbStorage filmDbStorage;
+    private final FilmService filmService;
 
     public UserService(Storage<User> storage, FriendDbStorage friendDbStorage,
-                FeedDbStorage feedDbStorage, FilmDbStorage filmDbStorage) {
+                FeedDbStorage feedDbStorage, FilmService filmService) {
         super(storage);
         this.friendDbStorage = friendDbStorage;
-        this.filmDbStorage = filmDbStorage;
         this.feedDbStorage = feedDbStorage;
+        this.filmService = filmService;
+    }
+
+    @Override
+    public User getEntity(int id) {
+        User user = storage.getEntityById(id);
+        user.setFriends(friendDbStorage.getFriendsId(id));
+        return user;
+    }
+
+    @Override
+    public List<User> get() {
+        return storage.get()
+                .stream()
+                .peek(user -> user.setFriends(friendDbStorage.getFriendsId(user.getId())))
+                .collect(Collectors.toList());
     }
 
     public void createFriendship(int firstUserId, int secondUserId) {
@@ -82,6 +98,6 @@ public class UserService extends BaseService<User> {
     }
 
     public List<Film> getRecommendations(int id) {
-        return filmDbStorage.getRecommendations(id);
+        return filmService.getRecommendations(id);
     }
 }

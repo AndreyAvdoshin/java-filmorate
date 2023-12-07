@@ -315,7 +315,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(review1)))
                 .andExpect(status().isOk());
 
-        review1.setReviewId(1);
+        review1.setId(1);
         review1.setContent("Обновленный отзыв номер 1");
 
         mockMvc.perform(put("/reviews")
@@ -347,7 +347,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(review1)))
                 .andExpect(status().isOk());
 
-        review1.setReviewId(9999);
+        review1.setId(9999);
         mockMvc.perform(put("/reviews")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(review1)))
