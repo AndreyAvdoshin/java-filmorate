@@ -16,6 +16,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,45 +26,6 @@ import java.util.stream.Collectors;
 public class FilmDbStorage implements Storage<Film> {
 
     private final JdbcTemplate jdbcTemplate;
-
-    private final String getPopularGenreAndYear = "SELECT f.*, COUNT(l.film_id) as likes_count, mpa.* " +
-            "FROM films f " +
-            "JOIN film_genre fg ON f.id = fg.film_id " +
-            "LEFT JOIN mpa ON f.mpa_id = mpa.id " +
-            "JOIN genres g ON fg.genre_id = g.id " +
-            "LEFT JOIN likes l ON f.id = l.film_id " +
-            "WHERE g.id  = ? AND EXTRACT(YEAR FROM f.release_date) = ? " +
-            "GROUP BY f.id " +
-            "ORDER BY likes_count DESC " +
-            "LIMIT ?";
-
-    private final String getPopularLike = "SELECT films.*, mpa.* " +
-            "FROM films " +
-            "LEFT JOIN mpa ON films.mpa_id = mpa.id " +
-            "LEFT JOIN likes ON films.id = likes.film_id " +
-            "GROUP BY films.id " +
-            "ORDER BY COUNT(likes.user_id) DESC " +
-            "LIMIT ?";
-
-    private final String getPopularYear = "SELECT f.*, COUNT(l.film_id) as likes_count, mpa.*" +
-            "FROM films f " +
-            "LEFT JOIN mpa ON f.mpa_id = mpa.id " +
-            "LEFT JOIN likes l ON f.id = l.film_id " +
-            "WHERE EXTRACT(YEAR FROM f.release_date) = ? " +
-            "GROUP BY f.id " +
-            "ORDER BY likes_count DESC " +
-            "LIMIT ?";
-
-    private final String getPopularGenre = "SELECT f.*, COUNT(l.film_id) as likes_count, mpa.*" +
-            "FROM films f " +
-            "LEFT JOIN mpa ON f.mpa_id = mpa.id " +
-            "JOIN film_genre fg ON f.id = fg.film_id " +
-            "JOIN genres g ON fg.genre_id = g.id " +
-            "LEFT JOIN likes l ON f.id = l.film_id " +
-            "WHERE g.id  = ? " +
-            "GROUP BY f.id " +
-            "ORDER BY likes_count DESC " +
-            "LIMIT ?";
 
     @Autowired
     public FilmDbStorage(JdbcTemplate jdbcTemplate) {
@@ -220,21 +182,34 @@ public class FilmDbStorage implements Storage<Film> {
     }
 
     public List<Film> getRatedFilms(Integer count, Integer genreId, Integer releaseYear) {
-        List<Film> films;
-        log.info("Запрос фильмов по рейтингу");
-        if (genreId != null || releaseYear != null) {
-            if (genreId != null && releaseYear != null) {
-                films = jdbcTemplate.query(getPopularGenreAndYear, new FilmMapper(), genreId, releaseYear, count);
-            } else if (genreId != null) {
-                    films = jdbcTemplate.query(getPopularGenre, new FilmMapper(), genreId, count);
-
-                } else {
-                    films = jdbcTemplate.query(getPopularYear, new FilmMapper(), releaseYear, count);
-                }
-        } else {
-            films = jdbcTemplate.query(getPopularLike, new FilmMapper(), count);
+        log.info("Запрос фильмов по рейтингу c параметрами count - {}, genreId - {}, releaseYear - {}",
+                count, genreId, releaseYear);
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        Map<String, Object> params = new HashMap<>();
+        if (count != null) {
+            params.put("count", count);
         }
-        return films;
+        if (genreId != null) {
+            params.put("genreId", genreId);
+        }
+        if (releaseYear != null) {
+            params.put("releaseYear", releaseYear);
+        }
+
+        String sql = "SELECT f.*, mpa.* " +
+                "FROM films f " +
+                (params.containsKey("genreId") ? "JOIN film_genre fg ON f.id = fg.film_id " : "") +
+                "LEFT JOIN mpa ON f.mpa_id = mpa.id " +
+                (params.containsKey("genreId") ? "JOIN genres g ON fg.genre_id = g.id " : "") +
+                "LEFT JOIN likes l ON f.id = l.film_id " +
+                "WHERE " +
+                (params.containsKey("genreId") ? "g.id  = :genreId " : "1=1 ") +
+                "AND " +
+                (params.containsKey("releaseYear") ? "EXTRACT(YEAR FROM f.release_date) = :releaseYear " : "1=1 ") +
+                "GROUP BY f.id " +
+                "ORDER BY COUNT(l.film_id) DESC " +
+                (params.containsKey("count") ? "LIMIT :count" : "");
+        return namedParameterJdbcTemplate.query(sql, params, new FilmMapper());
     }
 
     public List<Film> getFilmsByQueryFieldAndCategories(String queryField, List<String> queryCategories) {
