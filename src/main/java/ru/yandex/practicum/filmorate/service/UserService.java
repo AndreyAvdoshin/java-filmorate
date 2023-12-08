@@ -70,7 +70,7 @@ public class UserService extends BaseService<User> {
     }
 
     public List<User> getFriends(int id) {
-        getEntity(id);
+        checkIfExists(id);
         return friendDbStorage.getFriends(id);
     }
 
@@ -86,13 +86,17 @@ public class UserService extends BaseService<User> {
         return user;
     }
 
-    public void checkUsers(int firstUserId, int secondUserId) {
-        getEntity(firstUserId);
-        getEntity(secondUserId);
+    private void checkUsers(int firstUserId, int secondUserId) {
+        checkIfExists(firstUserId);
+        checkIfExists(secondUserId);
+    }
+
+    private void checkIfExists(int id) {
+        getEntity(id);
     }
 
     public List<Event> getEvents(int userId) {
-        getEntity(userId);
+        checkIfExists(userId);
         return feedDbStorage.getEventsByUserId(userId);
     }
 
