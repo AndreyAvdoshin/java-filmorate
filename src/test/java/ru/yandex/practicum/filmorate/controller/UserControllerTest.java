@@ -99,6 +99,22 @@ class UserControllerTest {
     }
 
     @Test
+    void shouldGet200WhenDeleteUser() throws Exception {
+        userController.create(user);
+
+        mockMvc.perform(delete("/users/1"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldGet404WhenDeleteIncorrectId() throws Exception {
+        userController.create(user);
+
+        mockMvc.perform(delete("/users/9999"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void shouldCreateUserWithEmptyNameAndGet200() throws Exception {
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -222,7 +238,6 @@ class UserControllerTest {
 
         mockMvc.perform(get("/users/1/friends"))
                 .andExpect(status().isOk())
-                // Ожидаем, что возвращенный JSON содержит ожидаемый список друзей
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].email").value("aaa@bbb.eee"))

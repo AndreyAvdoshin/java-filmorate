@@ -5,15 +5,16 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PastOrPresent;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Data
-@Builder
-@AllArgsConstructor
+@SuperBuilder
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class User extends Entity {
 
@@ -21,7 +22,6 @@ public class User extends Entity {
     @Email
     private String email;
 
-    @NonNull
     @NotBlank
     private String login;
 

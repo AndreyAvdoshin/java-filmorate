@@ -4,6 +4,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -13,10 +14,10 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @JdbcTest
 class UserDbStorageTest {
-
     private final FriendDbStorage friendDbStorage;
     private final UserDbStorage userDbStorage;
 
@@ -27,7 +28,7 @@ class UserDbStorageTest {
     @Autowired
     public UserDbStorageTest(JdbcTemplate jdbcTemplate) {
         this.friendDbStorage = new FriendDbStorage(jdbcTemplate);
-        this.userDbStorage = new UserDbStorage(jdbcTemplate, friendDbStorage);
+        this.userDbStorage = new UserDbStorage(jdbcTemplate);
     }
 
     @BeforeEach
@@ -75,6 +76,17 @@ class UserDbStorageTest {
                 .isNotNull()
                 .usingRecursiveComparison()
                 .isEqualTo(updatedUser);
+    }
+
+    @Test
+    void shouldDeleteUser() {
+        newUser = userDbStorage.create(newUser);
+        userDbStorage.delete(newUser.getId());
+
+        final NotFoundException exception = assertThrows(
+                NotFoundException.class,
+                () -> userDbStorage.getEntityById(newUser.getId())
+        );
     }
 
     @Test
